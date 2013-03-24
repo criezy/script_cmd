@@ -1,0 +1,139 @@
+This program interprets C-like mathematical expressions and prints the result.
+
+In Script mode, you can specify a multi-line script that contains variables,
+then set the variable values and run the script multiple times (changing the
+variable values between each run if you want to.
+
+In simple mode, each line you type is interpreted as a simple equation and the
+result is printed when you press return.
+
+The program was written during free time in my universities days (in 2000) and
+was cleaned in 2013 when I decided to share it. If you somehow stumble onto
+this code and find it useful, or merely interesting, please drop me an email
+to let me know (although I doubt it will ever happen, if I receive even only
+one email that will make my day :) ). Also fill free to open pull requests
+on github.com/criezy/ for any improvement you make.
+
+
+1) Usage and options
+2) Simple Mode
+3) Script Mode
+4) Compilation and contributions
+
+
+1) Usage and options
+--------------------
+Usage: script [options]
+
+When no option is given it starts the program in interactive script mode.
+
+Options can be:\n");
+  --help              Print this help.
+  --simple-mode       Interactive simple equation mode.
+  -e                  Same as --simple-mode
+  --script='command'  Start in script mode and set the script to the given one.
+  -s 'command'        Same as --script='command'
+  --file=path         Start in script mode and load the script from the given file.
+  -f path             Same as --file=path
+
+2) Simple Mode
+--------------
+Each line you type is interpreted as a mathematical expression and the result is
+printed on the next line. Type 'help' to get a list of recognised constant names,
+functions and operators. Type 'exit' or 'quit' to quit the program.
+
+Example of expression syntax:
+$ ./script -e
+Starting simple equation mode.
+Type 'help' to get some help.
+> (3 + 12) / 5
+3
+> 3 + 12 / 5
+5.4
+> if (cos(3 + 12 / 5) < 0, ceil(fabs(cos(3 + 12 / 5))), sqrt(3 + 12 / 5))
+2.32379000772
+> cos(3 + 12 / 5) 
+0.634692875943
+> sqrt(3 + 12 / 5)
+2.32379000772
+
+
+3) Script Mode
+--------------
+In script mode, you enter a multi-line script that may contain variables. Then
+you can set the variable values and run the script multiple times. To define
+the script you can:
+  - give it to the program on the command line (--script= option) 
+  - give it to the program as a text file (--file= option)
+  - type it after starting the program
+
+To type the script in the program, type 'START'. Then everything you type until
+you type 'END' will define the script. If you start typing a script it will
+throw away any script that might already have been defined (either passed to
+the command line or previously typed in the program).
+
+When not typing the script, the following commands are recognised:
+  - 'start'     Start defining the script.
+  - 'help'      Print a help message.
+  - 'run'       Run the script previously defined.
+  - 'script'    Print the script previously defined.
+  - 'variables' Print the list of variables in the previously defined script.
+  - 'quit'    Quit the program ('exit' also works).
+  - Everything else will be interpreted as a one line script and run immediately.
+    This is usually used to set variable values (e.g. 'foo = 12.5').
+
+Consider the following script.
+$ ./script
+Starting script mode.
+Type 'help' to get some help.
+> start
+  if (z == 0) {
+      x = y;
+  } else {
+      x = y / (2. * z);
+  }
+  print(x);
+  print(y);
+  print(z);
+  z = z + 1;
+  end
+> 
+
+You can then set the initial value for the variables y and z:
+> y = 48;
+> z = 0;
+
+And then run the script several times:
+> run
+x = 48
+y = 48
+z = 0
+> run
+x = 24
+y = 48
+z = 1
+> run
+x = 12
+y = 48
+z = 2
+> run
+x = 8
+y = 48
+z = 3
+
+4) Compilation and contributions
+
+Compilation should be straighforward: type 'make' and that's it.
+
+The source code was originally written on SunOS, IRIX and HP-UX. I have not
+tested compilation on those systems when cleaning the code as I don't have
+access to those anymore. I can however confirm it compiles and works on
+Debian and Mac OS X. And I don't see why it would not work on any other
+Linux and Unix systems.
+
+Part of the code is documented as I was experimenting with doxygen, but
+overall there is little comments or documentation (now you have been warned
+feel free to look at the code anyway).
+
+And if you do any modifications you deem worthwhile, please open a pull
+request on github.com/criezy/ where the code is hosted.
