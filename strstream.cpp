@@ -45,7 +45,7 @@ String StrReadStream::readLine() {
 		++end;
 
 	String str = string_.mid(pos_, end - 1);
-	
+
 	// skip the end of line and set pos
 	if (end < size) {
 		++end;
@@ -54,7 +54,7 @@ String StrReadStream::readLine() {
 			++end;
 	}
 	pos_ = end;
-	
+
 	return str;
 }
 

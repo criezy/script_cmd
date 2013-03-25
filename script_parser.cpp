@@ -189,7 +189,7 @@ void ScriptParser::breakBlock(
 			s += String::format("!!%d\n", line) + stream.readLine();
 			++line;
 		}
-		
+
 		// remove C style comments
 		// remove C++ and Shell (one line) style comments
 		// add new line after ;

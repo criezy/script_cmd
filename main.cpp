@@ -115,7 +115,7 @@ int main(int argc, char* argv[])  {
 		runScriptModule(second_arg);
 		return 0;
 	}
-	
+
 	printf("Unrecognized option.\n");
 	printHelp(argv[0]);
 	return 1;

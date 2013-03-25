@@ -27,11 +27,11 @@ public:
 	ListSharedData();
 	ListSharedData(const ListSharedData<T>&);
 	~ListSharedData();
-	
+
 	int capacity_;
 	int size_;
 	T* storage_;
-	
+
 	int ref_cpt_;
 };
 
@@ -40,14 +40,14 @@ public:
 	List();
 	List(const List<T> &list);
 	List(const T *data, int n);
-	
+
 	~List();
-	
+
 	List<T>& operator=(const List<T>&);
-	
+
 	int size() const;
 	bool isEmpty() const;
-	
+
 	void clear();
 
 	T& operator[](int);
@@ -57,35 +57,35 @@ public:
 	const T& first() const;
 	T& last();
 	const T& last() const;
-	
+
 	int indexOf(const T&) const;
 	bool contains(const T&) const;
-	
+
 	List<T>& operator<<(const T& value);
 	List<T>& operator<<(const List<T>& list);
-	
+
 	List<T>& operator+=(const T& value);
 	List<T>& operator+=(const List<T>& list);
-	
+
 	void append(const T&);
 	void prepend(const T&);
 	void insert(int i, const T&);
 	void replace(int i, const T&);
-	
+
 	T takeAt(int);
 	T takeFirst();
 	T takeLast();
-	
+
 	void removeAt(int);
 	void removeFirst();
 	void removaLast();
-	
+
 	bool operator==(const List<T>&) const;
 	bool operator!=(const List<T>&) const;
 
 	typedef T *iterator;
 	typedef const T *const_iterator;
-	
+
 	iterator begin() {
 		ensureUnique();
 		return data_ == NULL ? NULL : data_->storage_;
@@ -110,6 +110,6 @@ private:
 };
 
 #include "list.hpp"
-	
+
 
 #endif // str_h

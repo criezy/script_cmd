@@ -155,7 +155,7 @@ private:
 	StringList args_names_;
 	ParserOperator *start_point_;
 	StringList errors_;
-	
+
 	static String nullStr_;
 };
 

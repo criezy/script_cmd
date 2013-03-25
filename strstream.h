@@ -26,11 +26,11 @@ class StrReadStream {
 public:
 	StrReadStream(const String&);
 	~StrReadStream();
-	
+
 	String readLine();
 	char readChar();
 	bool atEnd() const;
-	
+
 private:
 	String string_;
 	int pos_;

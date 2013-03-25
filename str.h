@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2000, 2013 Thierry Crozat
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,11 +39,11 @@ public:
 		}
 	}
 	~StringSharedData() {delete [] str_;}
-	
+
 	int size_;
 	char* str_;
 	int capacity_;
-	
+
 	int ref_cpt_;
 };
 
@@ -76,18 +76,18 @@ public:
 	int length() const;
 	bool isEmpty() const;
 	char operator[](int idx) const;
-	
+
 	String left(int to) const;
 	String right(int from) const;
 	String mid(int from, int to) const;
-	
+
 	int toInt() const;
 
 	void deleteChar(int p);
 	void setChar(char c, int p);
 	void insertChar(char c, int p);
 	void replaceChar(char, char);
-	
+
 	int findChar(char, int from = 0) const;
 	int countChar(char, int from = 0) const;
 
@@ -95,7 +95,7 @@ public:
 
 	void trim();
 	String trimmed() const;
-	
+
 	void simplify();
 	String simplified() const;
 	void simplify(char);
@@ -111,7 +111,7 @@ protected:
 
 private:
 	StringSharedData* data_;
-	
+
 	static const char* const nullStr;
 };
 

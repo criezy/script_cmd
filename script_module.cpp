@@ -135,11 +135,11 @@ void runScriptModule(const String& s) {
 
 		if (line.isEmpty())
 			continue;
-		
+
 		// Check if it is exit
 		if (line == "exit" || line == "quit")
 			break;
-		
+
 		// Check if it is help
 		if (line.startsWith("help") && (line.length() == 4 || isspace(line[4]))) {
 			String topic = line.right(4).trimmed();
@@ -155,7 +155,7 @@ void runScriptModule(const String& s) {
 			printScriptModuleHelp(t);
 			continue;
 		}
-		
+
 		// start
 		if (line == "start") {
 			script_edition = true;
@@ -163,7 +163,7 @@ void runScriptModule(const String& s) {
 			script.clear();
 			continue;
 		}
-		
+
 		// script
 		if (line == "script") {
 			if (!script_defined) {
@@ -173,7 +173,7 @@ void runScriptModule(const String& s) {
 				printf("%s", script.c_str());
 			continue;
 		}
-		
+
 		// variables
 		if (line == "variables") {
 			if (!script_defined) {
@@ -185,7 +185,7 @@ void runScriptModule(const String& s) {
 			}
 			continue;
 		}
-		
+
 		// run
 		if (line == "run") {
 			if (!script_defined) {
@@ -195,7 +195,7 @@ void runScriptModule(const String& s) {
 				parser.evaluate(var_values);
 			continue;
 		}
-		
+
 		// Treat it as a one-line script
 		if (parser2.parse(line, variables))
 			parser2.evaluate(var_values);
@@ -209,6 +209,6 @@ void runScriptModule(const String& s) {
 			}
 		}
 	}
-	
+
 	delete [] var_values;
 }

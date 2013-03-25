@@ -63,7 +63,7 @@ template<class T> void List<T>::ensureUnique() {
 
 template<class T> void List<T>::ensureCapacity(int new_size) {
 	ensureUnique();
-	
+
 	int cur_capacity = data_ == NULL ? 0 : data_->capacity_;
 	if (new_size < cur_capacity)
 		return;
@@ -86,7 +86,7 @@ template<class T> void List<T>::ensureCapacity(int new_size) {
 		data_ = new ListSharedData<T>();
 		++data_->ref_cpt_;
 	}
-	
+
 	data_->storage_ = new_storage;
 	data_->size_ = size;
 	data_->capacity_ = new_capacity;

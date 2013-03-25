@@ -246,7 +246,7 @@ String String::left(int to) const {
 String String::right(int from) const {
 	if (isEmpty())
 		return String();
-	
+
 	if (from == 0)
 		return String(*this);
 	else if (from < 0) {
@@ -281,13 +281,13 @@ String String::mid(int from, int to) const {
 			return String();
 	} else if (to >= data_->size_)
 		to = data_->size_ - 1;
-	
+
 	if (to < from)
 		return String();
 
 	if (from == 0 && to == data_->size_ - 1)
 		return String(*this);
-	
+
 	return String(data_->str_ + from, to - from + 1);
 }
 
@@ -365,7 +365,7 @@ void String::insertChar(char c, int p) {
 void String::replaceChar(char c1, char c2) {
 	if (isEmpty())
 		return;
-	
+
 	ensureUnique();
 	for (int i = 0 ; i < data_->size_ ; ++i) {
 		if (data_->str_[i] == c1)
@@ -404,7 +404,7 @@ int String::findChar(char c, int from) const {
 int String::countChar(char c, int from) const {
 	if (isEmpty())
 		return 0;
-	
+
 	if (from < 0) {
 		from += data_->size_;
 		if (from < 0)
@@ -476,7 +476,7 @@ void String::simplify() {
 		return;
 
 	ensureUnique();
-	
+
 	int i = 0, j = 0;
 	while (i < data_->size_) {
 		if (!isspace(data_->str_[i]))
@@ -511,9 +511,9 @@ String String::simplified() const {
 void String::simplify(char c) {
 	if (isEmpty())
 		return;
-	
+
 	ensureUnique();
-	
+
 	int i = 0, j = 0;
 	while (i < data_->size_) {
 		if (data_->str_[i] != c)

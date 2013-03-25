@@ -103,11 +103,11 @@ void runEquationModule() {
 		String line = readLine();
 		if (line.isEmpty())
 			continue;
-		
+
 		// Check if it is exit
 		if (line == "exit" || line == "quit")
 			break;
-		
+
 		// Check if it is help
 		if (line.startsWith("help") && (line.length() == 4 || isspace(line[4]))) {
 			String topic = line.right(4).trimmed();
@@ -121,7 +121,7 @@ void runEquationModule() {
 			printEquationModuleHelp(t);
 			continue;
 		}
-		
+
 		// Treat it as an equation
 		if (!parser.parse(line, variables)) {
 			if (parser.nbErrors() == 0)
