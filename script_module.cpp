@@ -19,6 +19,7 @@
 
 #include "script_parser.h"
 #include "modules.h"
+#include "map.h"
 #include <math.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -63,12 +64,14 @@ void printScriptModuleHelp(int mode) {
 	default:
 		printf("Evaluates C-like script.\n");
 		printf("The following commands are recognized:\n");
-		printf("  - 'start'     Start defining the script. Type 'end' to finish the script\n");
-		printf("                definition. The script will consists of everything you have\n");
-		printf("                typed between 'start' and 'end'.\n");
-		printf("  - 'script'    Print the previously defined script.\n");
-		printf("  - 'variables' Print the list of variables in the previously defined script.\n");
-		printf("  - 'run'       Run the previously defined script.\n");
+		printf("  - 'start [name]'   Start defining a script. Optionaly a name can be given for the script.\n");
+		printf("                     Type 'end' to finish the script definition. The script will consists\n");
+		printf("                     of everything you have typed between 'start' and 'end'.\n");
+		printf("  - 'scripts'        List all the defined scripts.\n");
+		printf("  - 'clear [name]'   Clear the script with the given name.\n");
+		printf("  - 'script [name]'  Print the previously defined script with the given name.\n");
+		printf("  - 'variables'      Print the list of variables in the previously defined scripts.\n");
+		printf("  - 'run [name]'     Run the previously defined script with the given name.\n");
 		printf("  - 'help [topic]'   Print this help or help on a specific topic. Topics are:\n");
 		printf("                     'constants', 'functions', 'operators' and 'script'.\n");
 		printf("  - 'quit' or 'exit' Quit the program.\n");
@@ -76,46 +79,126 @@ void printScriptModuleHelp(int mode) {
 	}
 }
 
-bool parseScript(
-	const String& script,
-	ScriptParser& parser,
+void removeScript(
+	const String& name,
+	Map<String, String>& scripts,
 	StringList& variables,
 	double*& var_values
 ) {
+	// Remove this script
+	if (!scripts.remove(name))
+		return;
+
+	// Update list of variables
+	const StringList& names = scripts.keys();
+	StringList new_vars;
+	ScriptParser parser;
+	for (int i = 0 ; i < names.size() ; ++i) {
+		StringList script_vars = parser.getVariablesList(scripts[names[i]]);
+		for (int v = 0 ; v < script_vars.size() ; ++v) {
+			if (!new_vars.contains(script_vars[v]))
+				new_vars << script_vars[v];
+		}
+	}
+	if (new_vars.size() == variables.size())
+		return; // No variables was removed
+
+	// Update value array
+	double* new_values = NULL;
+	if (!new_vars.isEmpty()) {
+		new_values = new double[new_vars.size()];
+		for (int i = 0 ; i < new_vars.size() ; ++i) {
+			int index = variables.indexOf(new_vars[i]);
+			if (index == -1)
+				new_values[i] = 0.0;
+			else
+				new_values[i] = var_values[index];
+		}
+	}
+
 	delete [] var_values;
-	var_values = NULL;
+	var_values = new_values;
+	variables = new_vars;
+}
 
-	if (script.isEmpty())
-		return false;
+void addScript(
+	const String& script,
+	const String& name,
+	Map<String, String>& scripts,
+	StringList& variables,
+	double*& var_values
+) {
+	if (script.isEmpty()) {
+		removeScript(name, scripts, variables, var_values);
+		return;
+	}
 
-	variables = parser.getVariablesList(script);
+	// Check the script is valid
+	ScriptParser parser;
+	StringList new_vars = parser.getVariablesList(script);
 	if (parser.nbErrors() > 0) {
-		variables.clear();
 		printf("The script contains %d error(s):\n", parser.nbErrors());
 		for (int error = 0 ; error < parser.nbErrors() ; ++error)
 			printf("  %d: %s\n", error+1, parser.getError(error).c_str());
-		return false;
+		removeScript(name, scripts, variables, var_values);
+		return;
 	}
 
-	if (!parser.parse(script, variables)) {
-		variables.clear();
-		return false;
+	// Update list of variables
+	scripts.remove(name);
+	const StringList& names = scripts.keys();
+	for (int i = 0 ; i < names.size() ; ++i) {
+		StringList script_vars = parser.getVariablesList(scripts[names[i]]);
+		for (int v = 0 ; v < script_vars.size() ; ++v) {
+			if (!new_vars.contains(script_vars[v]))
+				new_vars << script_vars[v];
+		}
 	}
-	if (!variables.isEmpty()) {
-		var_values = new double[variables.size()];
-		for (int i = 0 ; i < variables.size() ; ++i)
-			var_values[i] = 0.0;
+	scripts[name] = script;
+
+	// Update value array
+	double* new_values = NULL;
+	if (!new_vars.isEmpty()) {
+		new_values = new double[new_vars.size()];
+		for (int i = 0 ; i < new_vars.size() ; ++i) {
+			int index = variables.indexOf(new_vars[i]);
+			if (index == -1)
+				new_values[i] = 0.0;
+			else
+				new_values[i] = var_values[index];
+		}
 	}
-	return true;
+
+	delete [] var_values;
+	var_values = new_values;
+	variables = new_vars;
+}
+
+String breakLine(const String& line, String& argument) {
+	String cmd = line.trimmed();
+	argument.clear();
+	if (cmd.isEmpty())
+		return cmd;
+	
+	int index = 1;
+	while (index < cmd.length() && !isspace(cmd[index]))
+		++ index;
+	if (index < cmd.length()) {
+		argument = cmd.right(index+1).trimmed();
+		return cmd.left(index-1);
+	}
+	return cmd;
 }
 
 void runScriptModule(const String& s) {
-	String script = s;
-	ScriptParser parser, parser2;
+	Map<String, String> scripts;
+	ScriptParser parser;
 	StringList variables;
+	String cur_script, cur_name;
 	double* var_values = NULL;
+	if (!s.isEmpty())
+		addScript(s, String(), scripts, variables, var_values);
 	bool script_edition = false;
-	bool script_defined = parseScript(script, parser, variables, var_values);
 	printf("Starting script mode.\nType 'help' to get some help.\n");
 	while (1) {
 		// Script edition
@@ -123,62 +206,85 @@ void runScriptModule(const String& s) {
 			String line = readLine(false);
 			if (line == "end\n") {
 				script_edition = false;
-				script_defined = parseScript(script, parser, variables, var_values);
+				addScript(cur_script, cur_name, scripts, variables, var_values);
+				if (cur_script.isEmpty())
+					scripts.remove(cur_name);
+				else
+					scripts[cur_name] = cur_script;
 			} else
-				script += line;
+				cur_script += line;
 			continue;
 		}
 
 		// Read a line
 		printf("> ");
 		String line = readLine();
+		String cmd = breakLine(line, cur_name);
 
-		if (line.isEmpty())
+		if (cmd.isEmpty())
 			continue;
 
 		// Check if it is exit
-		if (line == "exit" || line == "quit")
+		if (cmd == "exit" || cmd == "quit")
 			break;
 
 		// Check if it is help
-		if (line.startsWith("help") && (line.length() == 4 || isspace(line[4]))) {
-			String topic = line.right(4).trimmed();
+		if (cmd == "help") {
 			int t = 0;
-			if (topic == "constants")
+			if (cur_name == "constants")
 				t = 1;
-			else if (topic == "functions")
+			else if (cur_name == "functions")
 				t = 2;
-			else if (topic == "operators")
+			else if (cur_name == "operators")
 				t = 3;
-			else if (topic == "script")
+			else if (cur_name == "script")
 				t = 4;
 			printScriptModuleHelp(t);
 			continue;
 		}
 
 		// start
-		if (line == "start") {
+		if (cmd == "start") {
 			script_edition = true;
-			script_defined = false;
-			script.clear();
+			cur_script.clear();
+			continue;
+		}
+		
+		// scripts
+		if (cmd == "scripts") {
+			if (scripts.isEmpty()) {
+				printf("No script is currently defined.\n");
+				printf("Type 'start [name]' to define a script and 'end' when you have finished.\n");
+			} else {
+				const StringList& names = scripts.keys();
+				printf("There are %d scripts defined:\n", names.size());
+				for (int i = 0 ; i < names.size() ; ++i)
+					printf("   %s\n", names[i].c_str());
+			}
+			continue;
+		}
+		
+		// clear
+		if (cmd == "clear") {
+			removeScript(cur_name, scripts, variables, var_values);
 			continue;
 		}
 
 		// script
-		if (line == "script") {
-			if (!script_defined) {
-				printf("The script is not defined. Type 'start' to define the\n");
-				printf("script, and 'end' when you have finished.\n");
+		if (cmd == "script") {
+			if (!scripts.contains(cur_name)) {
+				printf("The script '%s' is not defined.\n", cur_name.c_str());
+				printf("Type 'scripts' to get a list of defined scripts.\n");
 			} else
-				printf("%s", script.c_str());
+				printf("%s", scripts[cur_name].c_str());
 			continue;
 		}
 
 		// variables
-		if (line == "variables") {
-			if (!script_defined) {
-				printf("The script is not defined. Type 'start' to define the\n");
-				printf("script, and 'end' when you have finished.\n");
+		if (cmd == "variables") {
+			if (scripts.isEmpty()) {
+				printf("No script is currently defined.\n");
+				printf("Type 'start [name]' to define a script and 'end' when you have finished.\n");
 			} else {
 				for (int i = 0 ; i < variables.size() ; ++i)
 					printf("%s = %.12g\n", variables[i].c_str(), var_values[i]);
@@ -187,25 +293,27 @@ void runScriptModule(const String& s) {
 		}
 
 		// run
-		if (line == "run") {
-			if (!script_defined) {
-				printf("The script is not defined. Type 'start' to define the\n");
-				printf("script, and 'end' when you have finished.\n");
-			} else
+		if (cmd == "run") {
+			if (!scripts.contains(cur_name)) {
+				printf("The script '%s' is not defined.\n", cur_name.c_str());
+				printf("Type 'scripts' to get a list of defined scripts.\n");
+			} else {
+				parser.parse(scripts[cur_name], variables);
 				parser.evaluate(var_values);
+			}
 			continue;
 		}
 
 		// Treat it as a one-line script
-		if (parser2.parse(line, variables))
-			parser2.evaluate(var_values);
+		if (parser.parse(line, variables))
+			parser.evaluate(var_values);
 		else {
-			if (parser2.nbErrors() == 0)
+			if (parser.nbErrors() == 0)
 				printf("Syntax error...\n");
 			else {
-				printf("Equation contains %d error(s):\n", parser2.nbErrors());
-				for (int error = 0 ; error < parser2.nbErrors() ; ++error)
-					printf("  %d: %s\n", error+1, parser2.getError(error).c_str());
+				printf("Equation contains %d error(s):\n", parser.nbErrors());
+				for (int error = 0 ; error < parser.nbErrors() ; ++error)
+					printf("  %d: %s\n", error+1, parser.getError(error).c_str());
 			}
 		}
 	}
