@@ -1,0 +1,4 @@
+.DS_Store
+.depend
+*.o
+script_cmd
