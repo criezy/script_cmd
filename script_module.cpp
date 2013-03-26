@@ -293,6 +293,11 @@ void runScriptModule(const String& s) {
 		}
 
 		// run
+		if (cur_name.isEmpty() && scripts.contains(cmd)) {
+			// Only the name of a script was typed. Run it.
+			cur_name = cmd;
+			cmd = "run";
+		}
 		if (cmd == "run") {
 			if (!scripts.contains(cur_name)) {
 				printf("The script '%s' is not defined.\n", cur_name.c_str());
