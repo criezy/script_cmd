@@ -65,11 +65,14 @@ void printScriptModuleHelp(int mode) {
 		printf("Evaluates C-like script.\n");
 		printf("The following commands are recognized:\n");
 		printf("  - 'start [name]'   Start defining a script. Optionaly a name can be given for the script.\n");
-		printf("                     Type 'end' to finish the script definition. The script will consists\n");
-		printf("                     of everything you have typed between 'start' and 'end'.\n");
+		printf("                     Type 'end' to finish the script definition. The script will consists of\n");
+		printf("                     everything you have typed between 'start' and 'end'.\n");
 		printf("  - 'scripts'        List all the defined scripts.\n");
 		printf("  - 'clear [name]'   Clear the script with the given name.\n");
 		printf("  - 'script [name]'  Print the previously defined script with the given name.\n");
+		printf("  - 'script [name] < file' Initialise the script with the given name using the content of the\n");
+		printf("                           given file.\n");
+		printf("  - 'script [name] > file' Save the script with the given name to the given file\n");
 		printf("  - 'variables'      Print the list of variables in the previously defined scripts.\n");
 		printf("  - 'run [name]'     Run the previously defined script with the given name.\n");
 		printf("  - 'help [topic]'   Print this help or help on a specific topic. Topics are:\n");
@@ -174,18 +177,40 @@ void addScript(
 	variables = new_vars;
 }
 
-String breakLine(const String& line, String& argument) {
+String breakLine(const String& line, String& argument, String& input_file, String& output_file) {
 	String cmd = line.trimmed();
 	argument.clear();
+	input_file.clear();
+	output_file.clear();
 	if (cmd.isEmpty())
 		return cmd;
-	
-	int index = 1;
-	while (index < cmd.length() && !isspace(cmd[index]))
+
+	// Check if we have an input file
+	int index = cmd.findChar('<');
+	if (index != -1) {
+		input_file = cmd.right(index + 1).trimmed();
+		cmd = cmd.left(index - 1).trimmed();
+	}
+	// Check if we have an output file
+	index = cmd.findChar('>');
+	if (index != -1) {
+		output_file = cmd.right(index + 1).trimmed();
+		cmd = cmd.left(index - 1).trimmed();
+	} else {
+		index = input_file.findChar('>');
+		if (index != -1) {
+			output_file = input_file.right(index + 1).trimmed();
+			input_file = input_file.left(index - 1).trimmed();
+		}
+	}
+	// break what remains of the command between a command and an argument if there is a space
+	index = 1;
+	while (index < cmd.length() && !isspace(cmd[index]) && cmd[index] != '<' && cmd[index] != '>')
 		++ index;
 	if (index < cmd.length()) {
 		argument = cmd.right(index+1).trimmed();
-		return cmd.left(index-1);
+		cmd = cmd.left(index-1);
+		
 	}
 	return cmd;
 }
@@ -194,7 +219,7 @@ void runScriptModule(const String& s) {
 	Map<String, String> scripts;
 	ScriptParser parser;
 	StringList variables;
-	String cur_script, cur_name;
+	String cur_script, cur_name, input_file, output_file;
 	double* var_values = NULL;
 	if (!s.isEmpty())
 		addScript(s, String(), scripts, variables, var_values);
@@ -207,10 +232,6 @@ void runScriptModule(const String& s) {
 			if (line == "end\n") {
 				script_edition = false;
 				addScript(cur_script, cur_name, scripts, variables, var_values);
-				if (cur_script.isEmpty())
-					scripts.remove(cur_name);
-				else
-					scripts[cur_name] = cur_script;
 			} else
 				cur_script += line;
 			continue;
@@ -219,7 +240,7 @@ void runScriptModule(const String& s) {
 		// Read a line
 		printf("> ");
 		String line = readLine();
-		String cmd = breakLine(line, cur_name);
+		String cmd = breakLine(line, cur_name, input_file, output_file);
 
 		if (cmd.isEmpty())
 			continue;
@@ -249,7 +270,7 @@ void runScriptModule(const String& s) {
 			cur_script.clear();
 			continue;
 		}
-		
+
 		// scripts
 		if (cmd == "scripts") {
 			if (scripts.isEmpty()) {
@@ -263,7 +284,7 @@ void runScriptModule(const String& s) {
 			}
 			continue;
 		}
-		
+
 		// clear
 		if (cmd == "clear") {
 			removeScript(cur_name, scripts, variables, var_values);
@@ -272,11 +293,34 @@ void runScriptModule(const String& s) {
 
 		// script
 		if (cmd == "script") {
+			if (!input_file.isEmpty()) {
+				FILE* file = fopen(input_file.c_str(), "r");
+				if (file == NULL)
+					printf("Cannot open file '%s'\n", input_file.c_str());
+				else {
+					char buffer[256];
+					cur_script.clear();
+					while (fgets(buffer, 256, file) != NULL)
+						cur_script += buffer;
+					fclose(file);
+					addScript(cur_script, cur_name, scripts, variables, var_values);
+				}
+			}
 			if (!scripts.contains(cur_name)) {
 				printf("The script '%s' is not defined.\n", cur_name.c_str());
 				printf("Type 'scripts' to get a list of defined scripts.\n");
-			} else
-				printf("%s", scripts[cur_name].c_str());
+			} else {
+				if (!output_file.isEmpty()) {
+					FILE* file = fopen(output_file.c_str(), "w");
+					if (file == NULL)
+						printf("Failed to save script to file '%s'.\n", output_file.c_str());
+					else {
+						fprintf(file, "%s", scripts[cur_name].c_str());
+						fclose(file);
+					}
+				} else
+					printf("%s", scripts[cur_name].c_str());
+			}
 			continue;
 		}
 
