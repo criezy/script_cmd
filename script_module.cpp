@@ -18,6 +18,7 @@
  */
 
 #include "script_parser.h"
+#include "redirect_output.h"
 #include "modules.h"
 #include "map.h"
 #include <math.h>
@@ -75,6 +76,8 @@ void printScriptModuleHelp(int mode) {
 		printf("  - 'script [name] > file' Save the script with the given name to the given file\n");
 		printf("  - 'variables'      Print the list of variables in the previously defined scripts.\n");
 		printf("  - 'run [name]'     Run the previously defined script with the given name.\n");
+		printf("  - 'run [name] > file'    Run the previously defined script with the given name and redirect.\n");
+		printf("                           output to file.\n");
 		printf("  - 'help [topic]'   Print this help or help on a specific topic. Topics are:\n");
 		printf("                     'constants', 'functions', 'operators' and 'script'.\n");
 		printf("  - 'quit' or 'exit' Quit the program.\n");
@@ -205,12 +208,11 @@ String breakLine(const String& line, String& argument, String& input_file, Strin
 	}
 	// break what remains of the command between a command and an argument if there is a space
 	index = 1;
-	while (index < cmd.length() && !isspace(cmd[index]) && cmd[index] != '<' && cmd[index] != '>')
+	while (index < cmd.length() && !isspace(cmd[index]))
 		++ index;
 	if (index < cmd.length()) {
 		argument = cmd.right(index+1).trimmed();
 		cmd = cmd.left(index-1);
-		
 	}
 	return cmd;
 }
@@ -347,8 +349,13 @@ void runScriptModule(const String& s) {
 				printf("The script '%s' is not defined.\n", cur_name.c_str());
 				printf("Type 'scripts' to get a list of defined scripts.\n");
 			} else {
+				bool redirected = false;
+				if (!output_file.isEmpty())
+					redirected = redirect_output(output_file);
 				parser.parse(scripts[cur_name], variables);
 				parser.evaluate(var_values);
+				if (redirected)
+					close_redirect_output();
 			}
 			continue;
 		}

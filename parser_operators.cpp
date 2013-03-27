@@ -18,6 +18,7 @@
  */
 
 #include "parser_operators.h"
+#include "redirect_output.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -44,9 +45,9 @@ double PrintOperator::evaluate() const {
 	double value = variable_->evaluate();
 	const VariableOperator* var = dynamic_cast<const VariableOperator*>(variable_);
 	if (var != NULL && !var->name().isEmpty())
-		printf("%s = %.12g\n", var->name().c_str(), value);
+		rprintf("%s = %.12g\n", var->name().c_str(), value);
 	else
-		printf("%.12g\n", value);
+		rprintf("%.12g\n", value);
 	return value;
 }
 

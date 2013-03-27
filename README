@@ -78,6 +78,8 @@ When not typing the script, the following commands are recognised:
   - 'scripts'       List defined scripts.
   - 'clear [name]'  Undefined the script with the given name.
   - 'run [name]'    Run the script previously defined with the given name.
+  - 'run [name] > file' Run the script previously defined with the given name and redirect output
+                        to file.
   - 'script [name]' Print the script previously defined with the given name.
   - 'script [name] < file' Initialise the script with the given name to the content of the given file.
   - 'script [name] > file' Save the script previously defined with the given name to the given file.

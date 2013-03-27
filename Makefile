@@ -5,6 +5,7 @@ LDFLAGS=
 SOURCES=\
 	str.cpp\
 	strstream.cpp\
+	redirect_output.cpp\
 	parser_operators.cpp\
 	equation_parser.cpp\
 	script_parser.cpp\
