@@ -1,3 +1,4 @@
+
 This program interprets C-like mathematical expressions and prints the result.
 
 In Script mode, you can specify a multi-line script that contains variables,
@@ -121,18 +122,26 @@ z = 0
 x = 24
 y = 48
 z = 1
-> run
-x = 12
-y = 48
-z = 2
-> run
-x = 8
-y = 48
-z = 3
+
+
+You can also use external text file for scripts and variable values. External
+variable files contain the variable name on the first line and values on
+following lines. The script is then run once for each line. And you can
+specify external files to which print() outputs are written.
+
+> script init < examples/elastic_init.txt
+> script compute < examples/elastic_compute.txt
+> script stats < examples/elastic_stats.txt
+> run init > result.txt
+> run compute < examples/elastic_data.txt > result.txt
+> run stats
+Total number of samples: 12
+Number of invalid samples: 1
+
 
 4) Compilation and contributions
 
-Compilation should be straighforward: type 'make' and that's it.
+Compilation should be straightforward: type 'make' and that's it.
 
 The source code was originally written on SunOS, IRIX and HP-UX. I have not
 tested compilation on those systems when cleaning the code as I don't have

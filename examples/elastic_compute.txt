@@ -1,0 +1,12 @@
+if (Vp <= 0 || Vs <= 0 || Rho <= 0) {
+    invalid = invalid + 1;
+} else {
+    Ip = Vp * Rho;
+    Is = Vs * Rho;
+    VpVs = Vp / Vs;
+    Poisson = 0.5 * (1 - Vs * Vs / (Vp * Vp - Vs * Vs));
+    RhoMu = Ip * Ip - 2 * Is * Is;
+    LambdaMu = (Ip * Ip - 2 * Is * Is) / (Is * Is);
+    print(Ip, Is, VpVs, Poisson, RhoMu, LambdaMu);
+}
+n = n + 1;

@@ -1,0 +1,3 @@
+n = 0;
+invalid = 0;
+print("Ip   Is   Vp/Vs    Poisson's Ratio   Rho*Mu    Lambda*Mu");

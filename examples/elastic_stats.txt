@@ -1,0 +1,2 @@
+print("Total number of samples:", n);
+print("Number of invalid samples:", invalid);
