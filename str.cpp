@@ -373,9 +373,33 @@ void String::replaceChar(char c1, char c2) {
 	}
 }
 
+/*! \fn int String::findSpace(int from = 0) const
+ *
+ * Return the index of the first occurance of a space character (as
+ * identified by isspace(char)), starting at the given position in
+ * the string. Returns -1 if no space is found in the string at or
+ * after the given \p from position.
+ */
+int String::findSpace(int from) const {
+	if (isEmpty())
+		return -1;
+	
+	if (from < 0) {
+		from += data_->size_;
+		if (from < 0)
+			from = 0;
+	}
+	while (from < data_->size_) {
+		if (isspace(data_->str_[from]))
+			return from;
+		++from;
+	}
+	return -1;
+}
+
 /*! \fn int String::findChar(char, int from = 0) const
  *
- * Return the index of the first occurance of thegiven char, starting
+ * Return the index of the first occurance of the given char, starting
  * at the given position in the string. Returns -1 if the char is not
  * found in the string at or after the given \p from position.
  */

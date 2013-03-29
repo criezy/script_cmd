@@ -321,7 +321,7 @@ void runScriptModule(const String& s) {
 						fclose(file);
 					}
 				} else
-					printf("%s", scripts[cur_name].c_str());
+					printf("%s\n", scripts[cur_name].c_str());
 			}
 			continue;
 		}
@@ -353,7 +353,50 @@ void runScriptModule(const String& s) {
 				if (!output_file.isEmpty())
 					redirected = redirect_output(output_file);
 				parser.parse(scripts[cur_name], variables);
-				parser.evaluate(var_values);
+				if (!input_file.isEmpty()) {
+					FILE* var_file = fopen(input_file.c_str(), "r");
+					if (var_file == NULL)
+						printf("Cannot open file %s\n", input_file.c_str());
+					else {
+						String line = readLine(true, var_file).trimmed();
+						List<int> column_mapping;
+						while (!line.isEmpty()) {
+							int space_i = line.findSpace();
+							String var;
+							if (space_i == -1) {
+								var = line;
+								line.clear();
+							} else {
+								var = line.left(space_i - 1);
+								line = line.right(space_i + 1).trimmed();
+							}
+							column_mapping << variables.indexOf(var);
+							if (column_mapping.last() == -1)
+								printf("Warning: variable %s ignored as it is not used in any script.\n", var.c_str());
+						}
+						while (!feof(var_file)) {
+							String line = readLine(true, var_file).trimmed();
+							int var_i = 0;
+							while (!line.isEmpty()) {
+								int space_i = line.findSpace();
+								String value;
+								if (space_i == -1) {
+									value = line;
+									line.clear();
+								} else {
+									value = line.left(space_i - 1);
+									line = line.right(space_i + 1).trimmed();
+								}
+								if (column_mapping[var_i] != -1)
+									sscanf(value.c_str(), "%lf", var_values + column_mapping[var_i]);
+								++var_i;
+							}
+							parser.evaluate(var_values);
+						}
+						fclose(var_file);
+					}
+				} else
+					parser.evaluate(var_values);
 				if (redirected)
 					close_redirect_output();
 			}

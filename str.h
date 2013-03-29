@@ -88,6 +88,7 @@ public:
 	void insertChar(char c, int p);
 	void replaceChar(char, char);
 
+	int findSpace(int from = 0) const;
 	int findChar(char, int from = 0) const;
 	int countChar(char, int from = 0) const;
 

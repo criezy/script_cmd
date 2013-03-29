@@ -21,12 +21,13 @@
 #define modules_h
 
 #include "str.h"
+#include <stdio.h>
 
 void runEquationModule();
 void runScriptModule(const String& script = String());
 
 void printEquationModuleHelp(int mode);
 void printScriptModuleHelp(int mode);
-String readLine(bool strip_eol = true);
+String readLine(bool strip_eol = true, FILE* stream = stdin);
 
 #endif // modules_h
