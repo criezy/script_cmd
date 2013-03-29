@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "str.h"
+#include "list.h"
+#include "strlist.h"
 #include "math_utils.h"
 
 /*! \class ParserOperator
@@ -73,13 +75,14 @@ private:
 
 class PrintOperator : public ParserOperator {
 public:
-	PrintOperator(ParserOperator *variable);
+	PrintOperator(const List<ParserOperator*>& values, const StringList& strings);
 	virtual ~PrintOperator();
 
 	virtual double evaluate() const;
 
 private:
-	ParserOperator *variable_;
+	List<ParserOperator*> values_;
+	StringList strings_;
 };
 
 class IfOperator : public ParserOperator {

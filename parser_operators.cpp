@@ -35,19 +35,41 @@ VariableOperator::VariableOperator(double *vardbl, const String& name) : ParserO
 VariableOperator::~VariableOperator() {
 }
 
-PrintOperator::PrintOperator(ParserOperator *variable) : ParserOperator(), variable_(variable) {
+PrintOperator::PrintOperator(const List<ParserOperator*>& values, const StringList& strings) :
+	ParserOperator(), values_(values), strings_(strings)
+{
 }
 PrintOperator::~PrintOperator() {
-	delete variable_;
+	for (int i = 0 ; i < values_.size() ; ++i)
+		delete values_[i];
 }
 
 double PrintOperator::evaluate() const {
-	double value = variable_->evaluate();
-	const VariableOperator* var = dynamic_cast<const VariableOperator*>(variable_);
-	if (var != NULL && !var->name().isEmpty())
-		rprintf("%s = %.12g\n", var->name().c_str(), value);
-	else
-		rprintf("%.12g\n", value);
+	if (values_.size() == 1) {
+		const VariableOperator* var = dynamic_cast<const VariableOperator*>(values_.first());
+		if (var != NULL && !var->name().isEmpty()) {
+			double value = var->evaluate();
+			// special case when print contains just a variable
+			rprintf("%s = %.12g\n", var->name().c_str(), value);
+			return value;
+		}
+	}
+
+	double value = 0.0;
+	int str_i = 0;
+	for (int i = 0 ; i < values_.size() ; ++i) {
+		if (values_[i] == NULL) {
+			if (str_i < strings_.size())
+				rprintf("%s", strings_[str_i++].c_str());
+		} else {
+			value = values_[i]->evaluate();
+			rprintf("%.12g", value);
+		}
+		if (i < values_.size() - 1)
+			rprintf(" ");
+		else
+			rprintf("\n");
+	}
 	return value;
 }
 

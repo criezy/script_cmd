@@ -107,7 +107,7 @@ class ParserOperator;
  * \endcode
  */
 class EquationParser {
-	enum TokenType { DELIMITER , VARIABLE , FUNCTION , NUMBER , NONE };
+	enum TokenType { DELIMITER , VARIABLE , FUNCTION , NUMBER , STRING, NONE };
 public:
 	EquationParser();
 	~EquationParser();
@@ -146,7 +146,7 @@ private:
 	// Equation parsing
 	String equation_;
 	const char *expression_;
-	char token_[80];
+	char token_[256];
 	TokenType token_type_;
 	bool auto_add_args_;
 	// Equation evaluation

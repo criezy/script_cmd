@@ -138,24 +138,40 @@ void EquationParser::getToken() {
 
 	if (*expression_ == 0)
 		return; // at end of expression_
-	while (isspace(*expression_)) ++expression_; // skip over white space
+	while (isspace(*expression_))
+		++expression_; // skip over white space
 
-	if (isdelim(*expression_)) {
+	if (*expression_ == '"') {
+		token_type_ = EquationParser::STRING;
+		++expression_;
+		while (*expression_ != '"' && *expression_ != 0)
+			*temp++ = *expression_++;
+		if (*expression_ != '"')
+			syntaxError(8);
+		else
+			++expression_;
+	} else if (isdelim(*expression_)) {
 		token_type_ = EquationParser::DELIMITER;
 		// advance to next char
 		*temp++ = *expression_++;
 		// some delimiter are on two chars, but we do not increment equation
 		*temp++ = *expression_;
 	} else if (isalpha(*expression_)) {
-		while (!isdelim(*expression_)) *temp++ = *expression_++;
-		while (isspace(*expression_)) ++expression_; // skip over white space
+		while (!isdelim(*expression_))
+			*temp++ = *expression_++;
+		while (isspace(*expression_))
+			++expression_; // skip over white space
 		if (*expression_ == '(')
 			token_type_ = EquationParser::FUNCTION;
 		else
 			token_type_ = EquationParser::VARIABLE;
 	} else if (isdigit(*expression_) || *expression_ == '.') {
-		while( !isdelim(*expression_) || (
-			   (*(expression_-1) == 'e' || *(expression_-1) == 'E') && (*expression_ == '+' || *expression_ == '-') ))
+		while(
+			!isdelim(*expression_) || (
+				(*(expression_-1) == 'e' || *(expression_-1) == 'E') &&
+				(*expression_ == '+' || *expression_ == '-')
+			)
+		)
 			*temp++ = *expression_++;
 		token_type_ = EquationParser::NUMBER;
 	}
@@ -373,9 +389,26 @@ ParserOperator *EquationParser::eval_exp7() {
 				if (strcmp(token_, "print") == 0) {
 					getToken(); // skip (
 					getToken();
-					ParserOperator *pop = eval_exp();
-					if (pop != NULL)
-						result = new PrintOperator(pop);
+					List<ParserOperator*> values;
+					StringList strings;
+					do {
+						if (token_type_ == EquationParser::STRING) {
+							values << NULL;
+							strings << String(token_);
+							getToken();
+						} else {
+							ParserOperator *pop = eval_exp();
+							if (pop != NULL)
+								values << pop;
+							else
+								break;
+						}
+						if (*token_ != ',')
+							break;
+						getToken();
+					} while (1);
+					if (!values.isEmpty())
+						result = new PrintOperator(values, strings);
 				} else if (strcmp(token_, "cos") == 0) {
 					getToken(); // skip (
 					getToken();
@@ -557,7 +590,10 @@ void EquationParser::syntaxError(int type) {
 			error = "No expression Present";
 			break;
 		case 3:
-			error = String::format("Unexpected token: %s", token_);
+			if (token_type_ == EquationParser::STRING)
+				error = "Strings are only supported in print() functions";
+			else
+				error = String::format("Unexpected token: %s", token_);
 			break;
 		case 4:
 			error = "Empty Parentheses";
@@ -570,6 +606,9 @@ void EquationParser::syntaxError(int type) {
 			break;
 		case 7:
 			error = String::format("Detected variable %s but maximum number of unknown variables has been reached", token_);
+			break;
+		case 8:
+			error = "Unbalanced quotes";
 			break;
 	}
 

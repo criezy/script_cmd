@@ -52,7 +52,7 @@ void printEquationModuleHelp(int mode) {
 		printf("  - cosh(x)   The hyperbolic cosine of x.\n");
 		printf("  - tanh(x)   The hyperbolic tangent of x.\n");
 		printf("  - if (x, y, z) If x is true (not equal to zero) return y, otherwise return z.\n");
-		printf("  - print(x)  Print the value of x.\n");
+		printf("  - print(x [, y, \"text\", z...])  Print the passed values and strings.\n");
 		break;
 	case 3:
 		printf("The recognized operators are:\n");
@@ -81,11 +81,11 @@ void printEquationModuleHelp(int mode) {
 	}
 }
 
-String readLine(bool strip_eol) {
+String readLine(bool strip_eol, FILE* stream) {
 	char buffer[256];
 	String line;
-	while (line.isEmpty() || line[line.length() - 1] != '\n') {
-		if (fgets(buffer, 256, stdin) != NULL)
+	while (!feof(stream) && (line.isEmpty() || line[line.length() - 1] != '\n')) {
+		if (fgets(buffer, 256, stream) != NULL)
 			line += buffer;
 	}
 	if (strip_eol)
