@@ -165,15 +165,36 @@ void EquationParser::getToken() {
 			token_type_ = EquationParser::FUNCTION;
 		else
 			token_type_ = EquationParser::VARIABLE;
-	} else if (isdigit(*expression_) || *expression_ == '.') {
+	} else if (isdigit(*expression_) || (*expression_ == '.' && isdigit(*(expression_+1)))) {
+		bool found_dot = false, exponent = false, error = false;
 		while(
-			!isdelim(*expression_) || (
-				(*(expression_-1) == 'e' || *(expression_-1) == 'E') &&
-				(*expression_ == '+' || *expression_ == '-')
-			)
-		)
-			*temp++ = *expression_++;
-		token_type_ = EquationParser::NUMBER;
+			isdigit(*expression_) || (!exponent && !found_dot && *expression_ == '.') ||
+			(!exponent && (*expression_ == 'e' || *expression_ == 'E'))
+		) {
+			if (*expression_ == '.')
+				found_dot = true;
+   			*temp++ = *expression_++;
+			if (*(expression_-1) == 'e' || *(expression_-1) == 'E') {
+				exponent = true;
+				// accept '+' or '-' as next character
+				if (*expression_ == '+' || *expression_ == '-')
+					*temp++ = *expression_++;
+				// check the next character is a digit
+				if (!isdigit(*expression_)) {
+					error = true;
+					break;
+				}
+			}
+		}
+		// Check that the next character is a delimiter
+		if (!error && isdelim(*expression_))
+			token_type_ = EquationParser::NUMBER;
+		else {
+			// This is not a number after all
+			// Get the rest of the token for proper error reporting
+			while (!isdelim(*expression_))
+				*temp++ = *expression_++;
+		}
 	} else {
 		// No idea what this is. Get the token for proper error reporting
 		while (!isdelim(*expression_))
