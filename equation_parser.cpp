@@ -227,8 +227,14 @@ ParserOperator *EquationParser::eval_exp1() {
 			case '=':
 				if (op2 == '=')
 					lop = new EqualOperator(lop, rop);
-				else
+				else {
+					if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+						delete lop;
+						syntaxError(9);
+						return NULL;
+					}
 					lop = new AssignmentOperator(lop, rop);
+				}
 				break;
 			case '<':
 				if (op2 == '=')
@@ -592,8 +598,15 @@ void EquationParser::syntaxError(int type) {
 		case 3:
 			if (token_type_ == EquationParser::STRING)
 				error = "Strings are only supported in print() functions";
-			else
+			else if (*token_ == 0)
+				error = "Unexpected end of equation";
+			else {
+				// Delimiter can have one or two characters, so make sure we don't print the second one
+				// if it is not a delimiter.
+				if (token_type_ == EquationParser::DELIMITER && !isdelim(token_[1]))
+					token_[1] = 0;
 				error = String::format("Unexpected token: %s", token_);
+			}
 			break;
 		case 4:
 			error = "Empty Parentheses";
@@ -609,6 +622,9 @@ void EquationParser::syntaxError(int type) {
 			break;
 		case 8:
 			error = "Unbalanced quotes";
+			break;
+		case 9:
+			error = "Non assignable statement on left of = operator.";
 			break;
 	}
 
