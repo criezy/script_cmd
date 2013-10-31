@@ -174,6 +174,10 @@ void EquationParser::getToken() {
 		)
 			*temp++ = *expression_++;
 		token_type_ = EquationParser::NUMBER;
+	} else {
+		// No idea what this is. Get the token for proper error reporting
+		while (!isdelim(*expression_))
+			*temp++ = *expression_++;
 	}
 	*temp = '\0';
 }
