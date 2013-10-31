@@ -166,35 +166,71 @@ void EquationParser::getToken() {
 		else
 			token_type_ = EquationParser::VARIABLE;
 	} else if (isdigit(*expression_) || (*expression_ == '.' && isdigit(*(expression_+1)))) {
-		bool found_dot = false, exponent = false, error = false;
-		while(
-			isdigit(*expression_) || (!exponent && !found_dot && *expression_ == '.') ||
-			(!exponent && (*expression_ == 'e' || *expression_ == 'E'))
-		) {
-			if (*expression_ == '.')
-				found_dot = true;
-   			*temp++ = *expression_++;
-			if (*(expression_-1) == 'e' || *(expression_-1) == 'E') {
-				exponent = true;
-				// accept '+' or '-' as next character
-				if (*expression_ == '+' || *expression_ == '-')
-					*temp++ = *expression_++;
-				// check the next character is a digit
-				if (!isdigit(*expression_)) {
+		// It looks like this might be a number
+		bool error = false;
+		if (*expression_ == '0' && *(expression_+1) == 'b') {
+			// Binary number
+			*temp++ = *expression_++;
+			*temp++ = *expression_++;
+			do {
+				if (!error && (*expression_ != '0' && *expression_ != '1'))
 					error = true;
-					break;
+				*temp++ = *expression_++;
+			} while (!isdelim(*expression_));
+		} else if (*expression_ == '0' && *(expression_+1) == 'o') {
+			// Octal number
+			*temp++ = *expression_++;
+			*temp++ = *expression_++;
+			do {
+				if (!error && (*expression_ < '0' || *expression_ > '7'))
+					error = true;
+				*temp++ = *expression_++;
+			} while (!isdelim(*expression_));
+		} else if (*expression_ == '0' && *(expression_+1) == 'x') {
+			// Hexadecimal number
+			*temp++ = *expression_++;
+			*temp++ = *expression_++;
+			do {
+				if (
+					!error &&
+					!isdigit(*expression_) &&
+					(*expression_ < 'a' || *expression_ > 'f') &&
+					(*expression_ < 'A' || *expression_ > 'F')
+				)
+					error = true;
+				*temp++ = *expression_++;
+			} while (!isdelim(*expression_));
+		} else {
+			// Floating point number
+			bool found_dot = false, exponent = false;
+			while(
+				isdigit(*expression_) || (!exponent && !found_dot && *expression_ == '.') ||
+				(!exponent && (*expression_ == 'e' || *expression_ == 'E'))
+			) {
+				if (*expression_ == '.')
+					found_dot = true;
+				*temp++ = *expression_++;
+				if (*(expression_-1) == 'e' || *(expression_-1) == 'E') {
+					exponent = true;
+					// accept '+' or '-' as next character
+					if (*expression_ == '+' || *expression_ == '-')
+						*temp++ = *expression_++;
+					// check the next character is a digit
+					if (!isdigit(*expression_)) {
+						error = true;
+						break;
+					}
 				}
 			}
+			if (!isdelim(*expression_)) {
+				error = true;
+				// Get the rest of the token for proper error reporting
+				while (!isdelim(*expression_))
+					*temp++ = *expression_++;
+			}
 		}
-		// Check that the next character is a delimiter
-		if (!error && isdelim(*expression_))
+		if (!error)
 			token_type_ = EquationParser::NUMBER;
-		else {
-			// This is not a number after all
-			// Get the rest of the token for proper error reporting
-			while (!isdelim(*expression_))
-				*temp++ = *expression_++;
-		}
 	} else {
 		// No idea what this is. Get the token for proper error reporting
 		while (!isdelim(*expression_))
@@ -388,7 +424,46 @@ ParserOperator *EquationParser::eval_exp7() {
 	ParserOperator *result = NULL;
 	switch (token_type_) {
 		case EquationParser::NUMBER:
-			result = new ConstantOperator(atof(token_));
+			switch (token_[1]) {
+				case 'b':
+				{
+					register char *temp = token_ + 2;
+					unsigned long long int nb = 0;
+					while (*temp != 0) {
+						nb <<= 1;
+						if (*temp++ == '1')
+							nb |= 1;
+					};
+					result = new ConstantOperator((double)nb);
+				}
+					break;
+				case 'o':
+				{
+					register char *temp = token_ + 2;
+					unsigned long long int nb = 0;
+					while (*temp != 0) {
+						nb <<= 3;
+						nb += (*temp++ - '0');
+					};
+					result = new ConstantOperator((double)nb);
+				}
+					break;
+				case 'x':
+				{
+					register char *temp = token_ + 2;
+					unsigned long long int nb = 0;
+					while (*temp != 0) {
+						nb <<= 4;
+						nb += isdigit(*temp) ? (*temp - '0') : (10 + tolower(*temp) - 'a');
+						++temp;
+					};
+					result = new ConstantOperator((double)nb);
+				}
+					break;
+				default:
+					result = new ConstantOperator(atof(token_));
+					break;
+			}
 			break;
 		case EquationParser::VARIABLE: {
 				// Built-in variables
