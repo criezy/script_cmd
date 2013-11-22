@@ -343,6 +343,7 @@ void ScriptParser::breakBlock(
 				// Add a '}' to match the added 'if (...) {' at the beginning of the else block
 				else_block += "}\n";
 				state = 2;
+				conditional_else_block = true;
 				continue;
 
 			} else
