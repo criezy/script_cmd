@@ -1,6 +1,10 @@
 CC=g++
-CFLAGS=-c -Wall
+CPPFLAGS=-c -Wall
 LDFLAGS=
+
+# To use readline
+#CPPFLAGS += -DUSE_READLINE
+#LDFLAGS += -lreadline
 
 SOURCES=\
 	str.cpp\
@@ -22,7 +26,7 @@ depend: .depend
 
 .depend: $(SOURCES)
 	rm -f ./.depend
-	$(CC) $(CFLAGS) -MM $^ > ./.depend;
+	$(CC) $(CPPFLAGS) -MM $^ > ./.depend;
 
 include .depend
 
@@ -31,7 +35,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CPPFLAGS) $< -o $@
 
 clean:
 	rm -rf *o $(EXECUTABLE)

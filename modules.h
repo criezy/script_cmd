@@ -28,6 +28,7 @@ void runScriptModule(const String& script = String());
 
 void printEquationModuleHelp(int mode);
 void printScriptModuleHelp(int mode);
-String readLine(bool strip_eol = true, FILE* stream = stdin);
+String readLine(const char* prompt, bool strip_eol = true);
+String readLine(bool strip_eol, FILE* stream);
 
 #endif // modules_h

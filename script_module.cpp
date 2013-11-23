@@ -230,7 +230,7 @@ void runScriptModule(const String& s) {
 	while (1) {
 		// Script edition
 		if (script_edition) {
-			String line = readLine(false);
+			String line = readLine(NULL, false);
 			if (line == "end\n") {
 				script_edition = false;
 				addScript(cur_script, cur_name, scripts, variables, var_values);
@@ -240,8 +240,7 @@ void runScriptModule(const String& s) {
 		}
 
 		// Read a line
-		printf("> ");
-		String line = readLine();
+		String line = readLine("> ");
 		String cmd = breakLine(line, cur_name, input_file, output_file);
 
 		if (cmd.isEmpty())

@@ -143,6 +143,10 @@ Number of invalid samples: 1
 
 Compilation should be straightforward: type 'make' and that's it.
 
+You can compile with support for the GNU deadline library for improved
+text inout (including history). To do so you need to edit two lines in the
+Makefile.
+
 The source code was originally written on SunOS, IRIX and HP-UX. I have not
 tested compilation on those systems when cleaning the code as I don't have
 access to those anymore. I can however confirm it compiles and works on

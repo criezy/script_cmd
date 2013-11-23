@@ -22,6 +22,9 @@
 #include <math.h>
 #include <ctype.h>
 #include <stdio.h>
+#ifdef USE_READLINE
+#include <readline/readline.h>
+#endif
 
 void printEquationModuleHelp(int mode) {
 	switch (mode) {
@@ -81,6 +84,23 @@ void printEquationModuleHelp(int mode) {
 	}
 }
 
+String readLine(const char* prompt, bool strip_eol) {
+#ifdef USE_READLINE
+	char *line = readline(prompt);
+	String str = line;
+	if (line != NULL && *line != 0)
+		add_history(line);
+	free(line);
+	if (!strip_eol)
+	str += "\n";
+	return str;
+#else
+	if (prompt != NULL && *prompt != 0)
+		printf("%s", prompt);
+	return readLine(strip_eol, stdin);
+#endif
+}
+
 String readLine(bool strip_eol, FILE* stream) {
 	char buffer[256];
 	String line;
@@ -98,9 +118,8 @@ void runEquationModule() {
 	EquationParser parser;
 	StringList variables;
 	while (1) {
-		printf("> ");
 		// Read a line
-		String line = readLine();
+		String line = readLine("> ");
 		if (line.isEmpty())
 			continue;
 
