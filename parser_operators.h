@@ -207,6 +207,18 @@ private:
 	ParserOperator *rarg;
 };
 
+class IncrementOperator : public ParserOperator {
+public:
+	IncrementOperator(ParserOperator *left, ParserOperator *right);
+	virtual ~IncrementOperator();
+ 
+	virtual double evaluate() const;
+ 
+private:
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
 class NSignOperator : public ParserOperator {
 public:
 	NSignOperator(ParserOperator *argument);
@@ -254,11 +266,35 @@ private:
 	ParserOperator *rarg;
 };
 
+class MultiplyAndAssignOperator : public ParserOperator {
+public:
+	MultiplyAndAssignOperator(ParserOperator *left, ParserOperator *right);
+	virtual ~MultiplyAndAssignOperator();
+ 
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
 class DivideOperator : public ParserOperator {
 public:
 	DivideOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~DivideOperator();
 
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
+class DivideAndAssignOperator : public ParserOperator {
+public:
+	DivideAndAssignOperator(ParserOperator *left, ParserOperator *right);
+	virtual ~DivideAndAssignOperator();
+ 
 	virtual double evaluate() const;
 
 private:
@@ -498,6 +534,8 @@ inline double NotEqualOperator::evaluate() const {return (!MathUtils::isEqual(la
 
 inline double AssignmentOperator::evaluate() const {return larg->setValue(rarg->evaluate());}
 
+inline double IncrementOperator::evaluate() const {return larg->setValue(larg->evaluate() + rarg->evaluate());}
+
 inline double NSignOperator::evaluate() const {return -1.*arg->evaluate();}
 
 inline double PlusOperator::evaluate() const {return larg->evaluate() + rarg->evaluate();}
@@ -506,7 +544,11 @@ inline double MinusOperator::evaluate() const {return larg->evaluate() - rarg->e
 
 inline double MultiplyOperator::evaluate() const {return larg->evaluate() * rarg->evaluate();}
 
+inline double MultiplyAndAssignOperator::evaluate() const {return larg->setValue(larg->evaluate() * rarg->evaluate());}
+
 inline double DivideOperator::evaluate() const {return larg->evaluate() / rarg->evaluate();}
+
+inline double DivideAndAssignOperator::evaluate() const {return larg->setValue(larg->evaluate() / rarg->evaluate());}
 
 inline double SqrtOperator::evaluate() const {return sqrt(arg->evaluate());}
 

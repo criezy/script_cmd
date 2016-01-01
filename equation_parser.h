@@ -78,6 +78,12 @@ class ParserOperator;
  *   - x > y, return true if x is greater than y.
  *   - x >= y, return true if x is greater or equal than y.
  *   - x = y, asignement (set x to y and return y).
+ *   - x += y, add y to x and store the result in x.
+ *   - x -= y, substract y from x and store the result in y.
+ *   - x *= y, multiply x and y and store the result in y.
+ *   - x /= y, divide x by y and store the result in y.
+ *   - ++x, prefix increment operator (add 1 to x).
+ *   - --x, prefix decrement operator (remove 1 from x).
  *
  * And you can of course use parenthesis to make sure the expressions are evaluated in the
  * order than you want them to be. The priority of the operators is the same than in C.
@@ -131,11 +137,11 @@ public:
 private:
 	void getToken();
 	ParserOperator *eval_exp();  // Operator && and ||
-	ParserOperator *eval_exp1(); // Operator =, ==, !=, <, <, <=, >=
+	ParserOperator *eval_exp1(); // Operator =, ==, !=, <, <, <=, >=, +=, -=, *=. /=
 	ParserOperator *eval_exp2(); // Add or subtract two terms.
 	ParserOperator *eval_exp3(); // Multiply or divide two factors.
 	ParserOperator *eval_exp4(); // Process ^ operator.
-	ParserOperator *eval_exp5(); // Process a unary + or -
+	ParserOperator *eval_exp5(); // Process a unary + or - and prefix ++ or --
 	ParserOperator *eval_exp6(); // Process a parenthesized expression , including functions.
 	ParserOperator *eval_exp7(); // Process functions, constant number and variable
 	bool isdelim(char c);

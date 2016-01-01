@@ -153,6 +153,13 @@ AssignmentOperator::~AssignmentOperator() {
 	delete rarg;
 }
 
+IncrementOperator::IncrementOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
+}
+IncrementOperator::~IncrementOperator() {
+	delete larg;
+	delete rarg;
+}
+
 PlusOperator::PlusOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
 }
 PlusOperator::~PlusOperator() {
@@ -174,9 +181,23 @@ MultiplyOperator::~MultiplyOperator() {
 	delete rarg;
 }
 
+MultiplyAndAssignOperator::MultiplyAndAssignOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
+}
+MultiplyAndAssignOperator::~MultiplyAndAssignOperator() {
+	delete larg;
+	delete rarg;
+}
+
 DivideOperator::DivideOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
 }
 DivideOperator::~DivideOperator() {
+	delete larg;
+	delete rarg;
+}
+
+DivideAndAssignOperator::DivideAndAssignOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
+}
+DivideAndAssignOperator::~DivideAndAssignOperator() {
 	delete larg;
 	delete rarg;
 }

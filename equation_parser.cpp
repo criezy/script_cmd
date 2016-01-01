@@ -265,14 +265,19 @@ ParserOperator *EquationParser::eval_exp() {
 	return lop;
 }
 
-// Operator =, ==, !=, <, <, <=, >=
+// Operator =, ==, !=, <, <, <=, >=, +=, -=. *=, /=
 ParserOperator *EquationParser::eval_exp1() {
-	register char op1, op2 = ' ';
 	ParserOperator *lop = eval_exp2();
 	if (lop == NULL)
 		return NULL;
-	op2 = *(token_+1); // make sure this is initialized
-	while (((op1 = *token_) == '!' && op2 == '=') || op1 == '=' || op1 == '<' || op1 == '>') {
+	register char op1 = *token_;
+	register char op2 = *(token_+1);
+	while (
+		(op1 == '!' && op2 == '=') ||
+		(op1 == '+' && op2 == '=') || (op1 == '-' && op2 == '=') ||
+		(op1 == '*' && op2 == '=') || (op1 == '/' && op2 == '=') ||
+		op1 == '=' || op1 == '<' || op1 == '>'
+	) {
 		getToken();
 		if (op2 == '=')
 			getToken();
@@ -309,25 +314,61 @@ ParserOperator *EquationParser::eval_exp1() {
 				else
 					lop = new GreaterOperator(lop, rop);
 				break;
+			case '+':
+				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+					delete lop;
+					syntaxError(8);
+					return NULL;
+				}
+				lop = new IncrementOperator(lop, rop);
+				break;
+			case '-':
+				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+					delete lop;
+					syntaxError(8);
+					return NULL;
+				}
+				lop = new AssignmentOperator(lop, new NSignOperator(rop));
+				break;
+			case '*':
+				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+					delete lop;
+					syntaxError(8);
+					return NULL;
+				}
+				lop = new MultiplyAndAssignOperator(lop, rop);
+				break;
+			case '/':
+				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+					delete lop;
+					syntaxError(8);
+					return NULL;
+				}
+				lop = new DivideAndAssignOperator(lop, rop);
+				break;
 		}
+		// Mase sure op1 and op2 are initialized for the next while test
+		op1 = *token_;
+		op2 = *(token_+1);
 	}
 	return lop;
 }
 
 // Add or subtract two terms.
 ParserOperator *EquationParser::eval_exp2() {
-	register char op;
 	ParserOperator *lop = eval_exp3();
 	if (lop == NULL)
 		return NULL;
-	while ((op = *token_) == '+' || op == '-') {
+	register char op1 = *token_;
+	register char op2 = *(token_+1);
+	while ((op1 == '+' || op1 == '-') && op2 != '=') {
 		getToken();
 		ParserOperator *rop = eval_exp3();
 		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
-		switch(op) {
+		switch(op1) {
 			case '-':
 				lop = new MinusOperator(lop, rop);
 				break;
@@ -335,24 +376,28 @@ ParserOperator *EquationParser::eval_exp2() {
 				lop = new PlusOperator(lop, rop);
 				break;
 		}
+		// Set op1 and op2 for next loop
+		op1 = *token_;
+		op2 = *(token_+1);
 	}
 	return lop;
 }
 
 // Multiply or divide two factors.
 ParserOperator *EquationParser::eval_exp3() {
-	register char op;
 	ParserOperator *lop = eval_exp4();
 	if (lop == NULL)
 		return NULL;
-	while ((op = *token_) == '*' || op == '/') {
+	register char op1 = *token_;
+	register char op2 = *(token_+1);
+	while ((op1 == '*' || op1 == '/') && op2 != '=') {
 		getToken();
 		ParserOperator *rop = eval_exp4();
 		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
-		switch (op) {
+		switch (op1) {
 			case '*':
 				lop = new MultiplyOperator(lop, rop);
 				break;
@@ -360,6 +405,9 @@ ParserOperator *EquationParser::eval_exp3() {
 				lop = new DivideOperator(lop, rop);
 				break;
 		}
+		// Set op1 and op2 for next loop
+		op1 = *token_;
+		op2 = *(token_+1);
 	}
 	return lop;
 }
@@ -382,14 +430,35 @@ ParserOperator *EquationParser::eval_exp4() {
 	return lop;
 }
 
-// Process a unary + or -
+// Process a unary + or - and prefix increment/decrement (++ and --)
 ParserOperator *EquationParser::eval_exp5() {
-	register char op;
-	op = 0;
-	if ((token_type_ == EquationParser::DELIMITER) && (*token_ == '+' || *token_ == '-')) {
+	register char op = 0;
+	if (
+		token_type_ == EquationParser::DELIMITER &&
+		(*token_ == '+' || *token_ == '-') &&
+		*(token_ + 1) != '='
+	) {
 		op = *token_;
 		getToken();
+		if (*token_ == op) {
+			// Increment or Decrement operator
+			getToken();
+			ParserOperator *lop = eval_exp6();
+			if (lop == NULL)
+				return NULL;
+			if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+				delete lop;
+				syntaxError(10);
+				return NULL;
+			}
+			if (op == '-')
+				lop = new IncrementOperator(lop, new ConstantOperator(-1.0));
+			else
+				lop = new IncrementOperator(lop, new ConstantOperator(1.0));
+			return lop;
+		}
 	}
+	// Unary + or - operator
 	ParserOperator *lop = eval_exp6();
 	if (lop == NULL)
 		return NULL;
@@ -725,6 +794,9 @@ void EquationParser::syntaxError(int type) {
 			break;
 		case 9:
 			error = "Non assignable statement on left of = operator.";
+			break;
+		case 10:
+			error = "Non assignable statement used with increment or decrement operator.";
 			break;
 	}
 
