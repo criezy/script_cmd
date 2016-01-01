@@ -65,10 +65,10 @@ void EquationParser::clearArguments() {
 double EquationParser::evaluate(double *arg) {
 	if (!start_point_)
 		return 0.;
-	if (arg != 0)
+	if (arg != NULL)
 		memcpy(args_double_, arg, args_names_.size() * sizeof(double));
 	double result = start_point_->evaluate();
-	if (arg != 0)
+	if (arg != NULL)
 		memcpy(arg, args_double_, args_names_.size() * sizeof(double)); // in case it has been modified
 	return result;
 }
@@ -243,13 +243,13 @@ void EquationParser::getToken() {
 ParserOperator *EquationParser::eval_exp() {
 	register char op;
 	ParserOperator *lop = eval_exp1();
-	if (lop == 0)
+	if (lop == NULL)
 		return NULL;
 	while (((op = *token_) == '&' && *(token_+1) == '&') || (op == '|' && *(token_+1) == '|')) {
 		getToken();
 		getToken();
 		ParserOperator *rop = eval_exp1();
-		if (rop == 0) {
+		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
@@ -269,7 +269,7 @@ ParserOperator *EquationParser::eval_exp() {
 ParserOperator *EquationParser::eval_exp1() {
 	register char op1, op2 = ' ';
 	ParserOperator *lop = eval_exp2();
-	if (lop == 0)
+	if (lop == NULL)
 		return NULL;
 	op2 = *(token_+1); // make sure this is initialized
 	while (((op1 = *token_) == '!' && op2 == '=') || op1 == '=' || op1 == '<' || op1 == '>') {
@@ -277,7 +277,7 @@ ParserOperator *EquationParser::eval_exp1() {
 		if (op2 == '=')
 			getToken();
 		ParserOperator *rop = eval_exp2();
-		if (rop == 0) {
+		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
@@ -318,12 +318,12 @@ ParserOperator *EquationParser::eval_exp1() {
 ParserOperator *EquationParser::eval_exp2() {
 	register char op;
 	ParserOperator *lop = eval_exp3();
-	if (lop == 0)
+	if (lop == NULL)
 		return NULL;
 	while ((op = *token_) == '+' || op == '-') {
 		getToken();
 		ParserOperator *rop = eval_exp3();
-		if (rop == 0) {
+		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
@@ -343,12 +343,12 @@ ParserOperator *EquationParser::eval_exp2() {
 ParserOperator *EquationParser::eval_exp3() {
 	register char op;
 	ParserOperator *lop = eval_exp4();
-	if (lop == 0)
+	if (lop == NULL)
 		return NULL;
 	while ((op = *token_) == '*' || op == '/') {
 		getToken();
 		ParserOperator *rop = eval_exp4();
-		if (rop == 0) {
+		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
@@ -368,12 +368,12 @@ ParserOperator *EquationParser::eval_exp3() {
 ParserOperator *EquationParser::eval_exp4() {
 	register char op;
 	ParserOperator *lop = eval_exp5();
-	if (lop == 0)
+	if (lop == NULL)
 		return NULL;
 	while ((op = *token_) == '^') {
 		getToken();
 		ParserOperator *rop = eval_exp5();
-		if (rop == 0) {
+		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
@@ -391,7 +391,7 @@ ParserOperator *EquationParser::eval_exp5() {
 		getToken();
 	}
 	ParserOperator *lop = eval_exp6();
-	if (lop == 0)
+	if (lop == NULL)
 		return NULL;
 	if (op == '-')
 		lop = new NSignOperator(lop);
