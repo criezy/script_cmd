@@ -469,9 +469,9 @@ ParserOperator *EquationParser::eval_exp5() {
 
 // Process a parenthesized expression
 ParserOperator *EquationParser::eval_exp6() {
-	if ((*token_ == '(')) {
+	if (*token_ == '(') {
 		getToken();
-		if ((*token_ == ')')) {
+		if (*token_ == ')') {
 			syntaxError(4);
 			return NULL;
 		}
