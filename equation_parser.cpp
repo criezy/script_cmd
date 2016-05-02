@@ -294,7 +294,7 @@ ParserOperator *EquationParser::eval_exp1() {
 				if (op2 == '=')
 					lop = new EqualOperator(lop, rop);
 				else {
-					if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+					if (!lop->canBeModified()) {
 						delete lop;
 						syntaxError(9);
 						return NULL;
@@ -315,7 +315,7 @@ ParserOperator *EquationParser::eval_exp1() {
 					lop = new GreaterOperator(lop, rop);
 				break;
 			case '+':
-				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+				if (!lop->canBeModified()) {
 					delete lop;
 					syntaxError(8);
 					return NULL;
@@ -323,7 +323,7 @@ ParserOperator *EquationParser::eval_exp1() {
 				lop = new IncrementOperator(lop, rop);
 				break;
 			case '-':
-				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+				if (!lop->canBeModified()) {
 					delete lop;
 					syntaxError(8);
 					return NULL;
@@ -331,7 +331,7 @@ ParserOperator *EquationParser::eval_exp1() {
 				lop = new AssignmentOperator(lop, new NSignOperator(rop));
 				break;
 			case '*':
-				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+				if (!lop->canBeModified()) {
 					delete lop;
 					syntaxError(8);
 					return NULL;
@@ -339,7 +339,7 @@ ParserOperator *EquationParser::eval_exp1() {
 				lop = new MultiplyAndAssignOperator(lop, rop);
 				break;
 			case '/':
-				if (dynamic_cast<VariableOperator*>(lop) == NULL) {
+				if (!lop->canBeModified()) {
 					delete lop;
 					syntaxError(8);
 					return NULL;

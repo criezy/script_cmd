@@ -40,6 +40,7 @@ public:
 
 	// Use by operator =
 	// Reimplement in classes that can change the argument value.
+	virtual bool canBeModified() const;
 	virtual double setValue(double value);
 
 protected:
@@ -65,6 +66,7 @@ public:
 
 	virtual double evaluate() const;
 
+	virtual bool canBeModified() const;
 	virtual double setValue(double value);
 	const String& name() const;
 
@@ -201,6 +203,9 @@ public:
 	virtual ~AssignmentOperator();
 
 	virtual double evaluate() const;
+	
+	virtual bool canBeModified() const;
+	virtual double setValue(double value);
 
 private:
 	ParserOperator *larg;
@@ -506,11 +511,13 @@ private:
  * Inline Functions implementation
  ***********************************************************/
 
+inline bool ParserOperator::canBeModified() const { return false;}
 inline double ParserOperator::setValue(double value) {return value;}
 
 inline double ConstantOperator::evaluate() const {return var_dbl;}
 
 inline double VariableOperator::evaluate() const {return *var_dbl;}
+inline bool VariableOperator::canBeModified() const { return true;}
 inline double VariableOperator::setValue(double value) {return (*var_dbl = value);}
 inline const String& VariableOperator::name() const {return name_;}
 
@@ -533,6 +540,11 @@ inline double EqualOrSmallerOperator::evaluate() const {return (MathUtils::isInf
 inline double NotEqualOperator::evaluate() const {return (!MathUtils::isEqual(larg->evaluate(), rarg->evaluate()) ? 1. : 0.);}
 
 inline double AssignmentOperator::evaluate() const {return larg->setValue(rarg->evaluate());}
+// Assignment operator can be modified if right operand can be modified.
+// This allows having a = b = c = 0; for example.
+// Assigning to the right argument needs to also do the evaluation, and thus set the left argument afterward.
+inline bool AssignmentOperator::canBeModified() const { return rarg->canBeModified();}
+inline double AssignmentOperator::setValue(double value) {return larg->setValue(rarg->setValue(value));}
 
 inline double IncrementOperator::evaluate() const {return larg->setValue(larg->evaluate() + rarg->evaluate());}
 
