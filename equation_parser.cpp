@@ -328,7 +328,7 @@ ParserOperator *EquationParser::eval_exp1() {
 					syntaxError(8);
 					return NULL;
 				}
-				lop = new AssignmentOperator(lop, new NSignOperator(rop));
+				lop = new IncrementOperator(lop, new NSignOperator(rop));
 				break;
 			case '*':
 				if (!lop->canBeModified()) {
