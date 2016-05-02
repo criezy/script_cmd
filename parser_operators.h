@@ -55,7 +55,6 @@ public:
 	virtual double evaluate() const;
 
 private:
-	float var_flt;
 	double var_dbl;
 };
 

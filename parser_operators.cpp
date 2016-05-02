@@ -26,7 +26,7 @@ ParserOperator::ParserOperator() {}
 ParserOperator::~ParserOperator() {}
 
 
-ConstantOperator::ConstantOperator(double c) : ParserOperator(), var_flt((float)c), var_dbl(c) {
+ConstantOperator::ConstantOperator(double c) : ParserOperator(), var_dbl(c) {
 }
 ConstantOperator::~ConstantOperator() {}
 
