@@ -152,7 +152,7 @@ private:
 	// Equation parsing
 	String equation_;
 	const char *expression_;
-	char token_[256];
+	char token_[512];
 	TokenType token_type_;
 	bool auto_add_args_;
 	// Equation evaluation
