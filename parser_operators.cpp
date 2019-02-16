@@ -73,6 +73,13 @@ double PrintOperator::evaluate() const {
 	return value;
 }
 
+SignOperator::SignOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+}
+
+SignOperator::~SignOperator() {
+	delete arg;
+}
+
 NSignOperator::NSignOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
 }
 NSignOperator::~NSignOperator() {
@@ -268,6 +275,13 @@ ATanOperator::~ATanOperator() {
 	delete arg;
 }
 
+ATan2Operator::ATan2Operator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
+}
+ATan2Operator::~ATan2Operator() {
+	delete larg;
+	delete rarg;
+}
+
 SinHOperator::SinHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
 }
 SinHOperator::~SinHOperator() {
@@ -283,6 +297,24 @@ CosHOperator::~CosHOperator() {
 TanHOperator::TanHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
 }
 TanHOperator::~TanHOperator() {
+	delete arg;
+}
+
+ASinHOperator::ASinHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+}
+ASinHOperator::~ASinHOperator() {
+	delete arg;
+}
+
+ACosHOperator::ACosHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+}
+ACosHOperator::~ACosHOperator() {
+	delete arg;
+}
+
+ATanHOperator::ATanHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+}
+ATanHOperator::~ATanHOperator() {
 	delete arg;
 }
 
@@ -311,4 +343,31 @@ PowOperator::~PowOperator() {
 	delete larg;
 	delete rarg;
 }
+
+Deg2RadOperator::Deg2RadOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+}
+Deg2RadOperator::~Deg2RadOperator() {
+	delete arg;
+}
+
+Rad2DegOperator::Rad2DegOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+}
+Rad2DegOperator::~Rad2DegOperator() {
+	delete arg;
+}
+
+MinimumOperator::MinimumOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
+}
+MinimumOperator::~MinimumOperator() {
+	delete larg;
+	delete rarg;
+}
+
+MaximumOperator::MaximumOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
+}
+MaximumOperator::~MaximumOperator() {
+	delete larg;
+	delete rarg;
+}
+
 

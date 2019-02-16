@@ -584,6 +584,12 @@ ParserOperator *EquationParser::eval_exp7() {
 					} while (1);
 					if (!values.isEmpty())
 						result = new PrintOperator(values, strings);
+				} else if (strcmp(token_, "sign") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new SignOperator(pop);
 				} else if (strcmp(token_, "cos") == 0) {
 					getToken(); // skip (
 					getToken();
@@ -681,6 +687,19 @@ ParserOperator *EquationParser::eval_exp7() {
 					ParserOperator *pop = eval_exp();
 					if (pop != NULL)
 						result = new ATanOperator(pop);
+				} else if (strcmp(token_, "atan2") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *lop = eval_exp();
+					if (lop) {
+						if (*token_ != ',') delete lop;
+						else {
+							getToken();
+							ParserOperator *rop = eval_exp();
+							if (!rop) delete lop;
+							else result = new ATan2Operator(lop,rop);
+						}
+					}
 				} else if (strcmp(token_, "sinh") == 0) {
 					getToken(); // skip (
 					getToken();
@@ -699,6 +718,62 @@ ParserOperator *EquationParser::eval_exp7() {
 					ParserOperator *pop = eval_exp();
 					if (pop != NULL)
 						result = new TanHOperator(pop);
+				} else if (strcmp(token_, "asinh") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new ASinHOperator(pop);
+				} else if (strcmp(token_, "acosh") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new ACosHOperator(pop);
+				} else if (strcmp(token_, "atanh") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new ATanHOperator(pop);
+				} else if (strcmp(token_, "degToRad") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new Deg2RadOperator(pop);
+				} else if (strcmp(token_, "radToDeg") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new Rad2DegOperator(pop);
+				} else if (strcmp(token_, "min") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *lop = eval_exp();
+					if (lop) {
+						if (*token_ != ',') delete lop;
+						else {
+							getToken();
+							ParserOperator *rop = eval_exp();
+							if (!rop) delete lop;
+							else result = new MinimumOperator(lop,rop);
+						}
+					}
+				} else if (strcmp(token_, "max") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *lop = eval_exp();
+					if (lop) {
+						if (*token_ != ',') delete lop;
+						else {
+							getToken();
+							ParserOperator *rop = eval_exp();
+							if (!rop) delete lop;
+							else result = new MaximumOperator(lop,rop);
+						}
+					}
 				} else if (strcmp(token_, "if") == 0) {
 					getToken(); // skip (
 					getToken();

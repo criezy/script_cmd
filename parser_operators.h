@@ -223,6 +223,17 @@ private:
 	ParserOperator *rarg;
 };
 
+class SignOperator : public ParserOperator {
+public:
+	SignOperator(ParserOperator* argument);
+	virtual ~SignOperator();
+
+	virtual double evaluate() const;
+	
+private:
+	ParserOperator *arg;
+};
+
 class NSignOperator : public ParserOperator {
 public:
 	NSignOperator(ParserOperator *argument);
@@ -428,6 +439,18 @@ private:
 	ParserOperator *arg;
 };
 
+class ATan2Operator : public ParserOperator {
+public:
+	ATan2Operator(ParserOperator *left, ParserOperator *right);
+	virtual ~ATan2Operator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
 class SinHOperator : public ParserOperator {
 public:
 	SinHOperator(ParserOperator *argument);
@@ -454,6 +477,39 @@ class TanHOperator : public ParserOperator {
 public:
 	TanHOperator(ParserOperator *argument);
 	virtual ~TanHOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *arg;
+};
+
+class ASinHOperator : public ParserOperator {
+public:
+	ASinHOperator(ParserOperator *argument);
+	virtual ~ASinHOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *arg;
+};
+
+class ACosHOperator : public ParserOperator {
+public:
+	ACosHOperator(ParserOperator *argument);
+	virtual ~ACosHOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *arg;
+};
+
+class ATanHOperator : public ParserOperator {
+public:
+	ATanHOperator(ParserOperator *argument);
+	virtual ~ATanHOperator();
 
 	virtual double evaluate() const;
 
@@ -506,6 +562,52 @@ private:
 	ParserOperator *rarg;
 };
 
+class Deg2RadOperator : public ParserOperator {
+public:
+	Deg2RadOperator(ParserOperator *argument);
+	virtual ~Deg2RadOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *arg;
+};
+
+class Rad2DegOperator : public ParserOperator {
+public:
+	Rad2DegOperator(ParserOperator *argument);
+	virtual ~Rad2DegOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *arg;
+};
+
+class MinimumOperator : public ParserOperator {
+public:
+	MinimumOperator(ParserOperator *left, ParserOperator *right);
+	virtual ~MinimumOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
+class MaximumOperator : public ParserOperator {
+public:
+	MaximumOperator(ParserOperator *left, ParserOperator *right);
+	virtual ~MaximumOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
 /***********************************************************
  * Inline Functions implementation
  ***********************************************************/
@@ -547,6 +649,8 @@ inline double AssignmentOperator::setValue(double value) {return larg->setValue(
 
 inline double IncrementOperator::evaluate() const {return larg->setValue(larg->evaluate() + rarg->evaluate());}
 
+inline double SignOperator::evaluate() const {return arg->evaluate() < 0. ? -1. : 1.;}
+
 inline double NSignOperator::evaluate() const {return -1.*arg->evaluate();}
 
 inline double PlusOperator::evaluate() const {return larg->evaluate() + rarg->evaluate();}
@@ -583,11 +687,19 @@ inline double ACosOperator::evaluate() const {return acos(arg->evaluate());}
 
 inline double ATanOperator::evaluate() const {return atan(arg->evaluate());}
 
+inline double ATan2Operator::evaluate() const {return atan2(larg->evaluate(), rarg->evaluate());}
+
 inline double SinHOperator::evaluate() const {return sinh(arg->evaluate());}
 
 inline double CosHOperator::evaluate() const {return cosh(arg->evaluate());}
 
 inline double TanHOperator::evaluate() const {return tanh(arg->evaluate());}
+
+inline double ASinHOperator::evaluate() const {return asinh(arg->evaluate());}
+
+inline double ACosHOperator::evaluate() const {return acosh(arg->evaluate());}
+
+inline double ATanHOperator::evaluate() const {return atanh(arg->evaluate());}
 
 inline double CeilOperator::evaluate() const {return ceil(arg->evaluate());}
 
@@ -596,6 +708,20 @@ inline double FloorOperator::evaluate() const {return floor(arg->evaluate());}
 inline double FAbsOperator::evaluate() const {return fabs(arg->evaluate());}
 
 inline double PowOperator::evaluate() const {return pow(larg->evaluate(),rarg->evaluate());}
+
+inline double Deg2RadOperator::evaluate() const {return arg->evaluate() * M_PI / 180.;}
+
+inline double Rad2DegOperator::evaluate() const {return arg->evaluate() * 180. / M_PI;}
+
+inline double MinimumOperator::evaluate() const {
+	double v1 = larg->evaluate(), v2 = rarg->evaluate();
+	return v1 < v2 ? v1 : v2;
+}
+
+inline double MaximumOperator::evaluate() const {
+	double v1 = larg->evaluate(), v2 = rarg->evaluate();
+	return v1 < v2 ? v2 : v1;
+}
 
 
 #endif

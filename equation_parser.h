@@ -50,15 +50,24 @@ class ParserOperator;
  *   - ceil(x), round x up (the smallest integer bigger or equal to x).
  *   - floor(x), round x down (the biggest integer smaller or equal to x).
  *   - fabs(x) or abs(x), absolute value of x (x if x is positive, -x otherwise).
- *   - cos(x), the cosine of x.
+ *   - sign(x), the sign of x (-1 for a negative value, 1 otherwise).
  *   - sin(x), the sine of x.
+ *   - cos(x), the cosine of x.
  *   - tan(x), the tangent of x.
  *   - asin(x), the arc sine of x.
  *   - acos(x), the arc cosine of x.
  *   - atan(x), the arc tangent of x.
+ *   - atan2(y, x), the angle between the x axis and the segment defined by the points (0,0) and (x,y), which corresponds to the phase of the complex number x + iy.
  *   - sinh(x), the hyperbolic sine of x.
  *   - cosh(x), the hyperbolic cosine of x.
  *   - tanh(x), the hyperbolic tangent of x.
+ *   - asinh(x), the arc hyperbolic sine of x.
+ *   - acosh(x), the arc hyperbolic cosine of x.
+ *   - atanh(x), the arc hyperbolic tangent of x.
+ *   - degToRad(x), converts an angle in degrees to radians.
+ *   - radToDeg(x), converts an angle in radians to degrees.
+ *   - min(value1, value2), the minimum of the two given values.
+ *   - max(value1, value2), the maximum of the two given values.
  *   - if (x, y, z), if x is true (not equal to zero) return y, otherwise return z.
  *   - print(x), print the value of x and return that value.
  *
