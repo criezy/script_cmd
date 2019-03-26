@@ -131,7 +131,7 @@ bool EquationParser::parse(
 }
 
 void EquationParser::getToken() {
-	register char *temp;
+	char *temp;
 	token_type_ = EquationParser::NONE;
 	temp = token_;
 	*temp = '\0';
@@ -244,8 +244,8 @@ ParserOperator *EquationParser::eval_exp() {
 ParserOperator *lop = eval_exp1();
 	if (lop == NULL)
 		return NULL;
-	register char op1 = *token_;
-	register char op2 = *(token_+1);
+	char op1 = *token_;
+	char op2 = *(token_+1);
 	while (
 		(op1 == '+' && op2 == '=') ||
 		(op1 == '-' && op2 == '=') ||
@@ -313,7 +313,7 @@ ParserOperator *lop = eval_exp1();
 
 // Operator ||
 ParserOperator *EquationParser::eval_exp1() {
-	register char op;
+	char op;
 	ParserOperator *lop = eval_exp2();
 	if (lop == NULL)
 		return NULL;
@@ -333,7 +333,7 @@ ParserOperator *EquationParser::eval_exp1() {
 
 // Operator &&
 ParserOperator *EquationParser::eval_exp2() {
-	register char op;
+	char op;
 	ParserOperator *lop = eval_exp3();
 	if (lop == NULL)
 		return NULL;
@@ -355,8 +355,8 @@ ParserOperator *EquationParser::eval_exp3() {
 	ParserOperator *lop = eval_exp4();
 	if (lop == NULL)
 		return NULL;
-	register char op1 = *token_;
-	register char op2 = *(token_+1);
+	char op1 = *token_;
+	char op2 = *(token_+1);
 	while (
 		(op1 == '!' && op2 == '=') ||
 		(op1 == '=' && op2 == '=') 
@@ -388,8 +388,8 @@ ParserOperator *EquationParser::eval_exp4() {
 	ParserOperator *lop = eval_exp5();
 	if (lop == NULL)
 		return NULL;
-	register char op1 = *token_;
-	register char op2 = *(token_+1);
+	char op1 = *token_;
+	char op2 = *(token_+1);
 	while (op1 == '<' || op1 == '>') {
 		getToken();
 		if (op2 == '=')
@@ -425,8 +425,8 @@ ParserOperator *EquationParser::eval_exp5() {
 	ParserOperator *lop = eval_exp6();
 	if (lop == NULL)
 		return NULL;
-	register char op1 = *token_;
-	register char op2 = *(token_+1);
+	char op1 = *token_;
+	char op2 = *(token_+1);
 	while ((op1 == '+' || op1 == '-') && op2 != '=') {
 		getToken();
 		ParserOperator *rop = eval_exp6();
@@ -454,8 +454,8 @@ ParserOperator *EquationParser::eval_exp6() {
 	ParserOperator *lop = eval_exp7();
 	if (lop == NULL)
 		return NULL;
-	register char op1 = *token_;
-	register char op2 = *(token_+1);
+	char op1 = *token_;
+	char op2 = *(token_+1);
 	while ((op1 == '*' || op1 == '/') && op2 != '=') {
 		getToken();
 		ParserOperator *rop = eval_exp7();
@@ -480,7 +480,7 @@ ParserOperator *EquationParser::eval_exp6() {
 
 // Process ^ (power) operator.
 ParserOperator *EquationParser::eval_exp7() {
-	register char op;
+	char op;
 	ParserOperator *lop = eval_exp8();
 	if (lop == NULL)
 		return NULL;
@@ -498,7 +498,7 @@ ParserOperator *EquationParser::eval_exp7() {
 
 // Process a unary + or - and prefix increment/decrement (++ and --)
 ParserOperator *EquationParser::eval_exp8() {
-	register char op = 0;
+	char op = 0;
 	if (
 		token_type_ == EquationParser::DELIMITER &&
 		(*token_ == '+' || *token_ == '-') &&
@@ -562,7 +562,7 @@ ParserOperator *EquationParser::eval_exp10() {
 			switch (token_[1]) {
 				case 'b':
 				{
-					register char *temp = token_ + 2;
+					char *temp = token_ + 2;
 					unsigned long long int nb = 0;
 					while (*temp != 0) {
 						nb <<= 1;
@@ -574,7 +574,7 @@ ParserOperator *EquationParser::eval_exp10() {
 					break;
 				case 'o':
 				{
-					register char *temp = token_ + 2;
+					char *temp = token_ + 2;
 					unsigned long long int nb = 0;
 					while (*temp != 0) {
 						nb <<= 3;
@@ -585,7 +585,7 @@ ParserOperator *EquationParser::eval_exp10() {
 					break;
 				case 'x':
 				{
-					register char *temp = token_ + 2;
+					char *temp = token_ + 2;
 					unsigned long long int nb = 0;
 					while (*temp != 0) {
 						nb <<= 4;
