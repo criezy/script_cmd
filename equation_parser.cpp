@@ -239,80 +239,36 @@ void EquationParser::getToken() {
 	*temp = '\0';
 }
 
-// Operator && and ||
+// Operator =, +=, -=, *=, /=
 ParserOperator *EquationParser::eval_exp() {
-	register char op;
-	ParserOperator *lop = eval_exp1();
-	if (lop == NULL)
-		return NULL;
-	while (((op = *token_) == '&' && *(token_+1) == '&') || (op == '|' && *(token_+1) == '|')) {
-		getToken();
-		getToken();
-		ParserOperator *rop = eval_exp1();
-		if (rop == NULL) {
-			delete lop;
-			return NULL;
-		}
-		switch(op) {
-			case '&':
-				lop = new AndOperator(lop, rop);
-				break;
-			case '|':
-				lop = new OrOperator(lop, rop);
-				break;
-		}
-	}
-	return lop;
-}
-
-// Operator =, ==, !=, <, <, <=, >=, +=, -=. *=, /=
-ParserOperator *EquationParser::eval_exp1() {
-	ParserOperator *lop = eval_exp2();
+ParserOperator *lop = eval_exp1();
 	if (lop == NULL)
 		return NULL;
 	register char op1 = *token_;
 	register char op2 = *(token_+1);
 	while (
-		(op1 == '!' && op2 == '=') ||
-		(op1 == '+' && op2 == '=') || (op1 == '-' && op2 == '=') ||
-		(op1 == '*' && op2 == '=') || (op1 == '/' && op2 == '=') ||
-		op1 == '=' || op1 == '<' || op1 == '>'
+		(op1 == '+' && op2 == '=') ||
+		(op1 == '-' && op2 == '=') ||
+		(op1 == '*' && op2 == '=') ||
+		(op1 == '/' && op2 == '=') ||
+		(op1 == '=' && op2 != '=')
 	) {
 		getToken();
 		if (op2 == '=')
 			getToken();
-		ParserOperator *rop = eval_exp2();
+		ParserOperator *rop = eval_exp1();
 		if (rop == NULL) {
 			delete lop;
 			return NULL;
 		}
 		switch (op1) {
-			case '!':
-				lop = new NotEqualOperator(lop, rop);
-				break;
 			case '=':
-				if (op2 == '=')
-					lop = new EqualOperator(lop, rop);
-				else {
-					if (!lop->canBeModified()) {
-						delete lop;
-						syntaxError(9);
-						return NULL;
-					}
-					lop = new AssignmentOperator(lop, rop);
+				if (!lop->canBeModified()) {
+					delete lop;
+					syntaxError(9);
+					return NULL;
 				}
-				break;
-			case '<':
-				if (op2 == '=')
-					lop = new EqualOrSmallerOperator(lop, rop);
-				else
-					lop = new SmallerOperator(lop, rop);
-				break;
-			case '>':
-				if (op2 == '=')
-					lop = new EqualOrGreaterOperator(lop, rop);
-				else
-					lop = new GreaterOperator(lop, rop);
+				lop = new AssignmentOperator(lop, rop);
 				break;
 			case '+':
 				if (!lop->canBeModified()) {
@@ -352,18 +308,128 @@ ParserOperator *EquationParser::eval_exp1() {
 		op2 = *(token_+1);
 	}
 	return lop;
+
+}
+
+// Operator ||
+ParserOperator *EquationParser::eval_exp1() {
+	register char op;
+	ParserOperator *lop = eval_exp2();
+	if (lop == NULL)
+		return NULL;
+	while ((op = *token_) == '|' && *(token_+1) == '|') {
+		getToken();
+		getToken();
+		ParserOperator *rop = eval_exp2();
+		if (rop == NULL) {
+			delete lop;
+			return NULL;
+		}
+		lop = new OrOperator(lop, rop);
+	}
+	return lop;
+}
+
+
+// Operator &&
+ParserOperator *EquationParser::eval_exp2() {
+	register char op;
+	ParserOperator *lop = eval_exp3();
+	if (lop == NULL)
+		return NULL;
+	while ((op = *token_) == '&' && *(token_+1) == '&') {
+		getToken();
+		getToken();
+		ParserOperator *rop = eval_exp3();
+		if (rop == NULL) {
+			delete lop;
+			return NULL;
+		}
+		lop = new AndOperator(lop, rop);
+	}
+	return lop;
+}
+
+// Operator ==, !=
+ParserOperator *EquationParser::eval_exp3() {
+	ParserOperator *lop = eval_exp4();
+	if (lop == NULL)
+		return NULL;
+	register char op1 = *token_;
+	register char op2 = *(token_+1);
+	while (
+		(op1 == '!' && op2 == '=') ||
+		(op1 == '=' && op2 == '=') 
+	) {
+		getToken();
+		getToken();
+		ParserOperator *rop = eval_exp4();
+		if (rop == NULL) {
+			delete lop;
+			return NULL;
+		}
+		switch (op1) {
+			case '!':
+				lop = new NotEqualOperator(lop, rop);
+				break;
+			case '=':
+				lop = new EqualOperator(lop, rop);
+				break;
+		}
+		// Make sure op1 and op2 are initialized for the next while test
+		op1 = *token_;
+		op2 = *(token_+1);
+	}
+	return lop;
+}
+
+// Operator <, <=, >, >=
+ParserOperator *EquationParser::eval_exp4() {
+	ParserOperator *lop = eval_exp5();
+	if (lop == NULL)
+		return NULL;
+	register char op1 = *token_;
+	register char op2 = *(token_+1);
+	while (op1 == '<' || op1 == '>') {
+		getToken();
+		if (op2 == '=')
+			getToken();
+		ParserOperator *rop = eval_exp5();
+		if (rop == NULL) {
+			delete lop;
+			return NULL;
+		}
+		switch (op1) {
+			case '<':
+				if (op2 == '=')
+					lop = new EqualOrSmallerOperator(lop, rop);
+				else
+					lop = new SmallerOperator(lop, rop);
+				break;
+			case '>':
+				if (op2 == '=')
+					lop = new EqualOrGreaterOperator(lop, rop);
+				else
+					lop = new GreaterOperator(lop, rop);
+				break;
+		}
+		// Make sure op1 and op2 are initialized for the next while test
+		op1 = *token_;
+		op2 = *(token_+1);
+	}
+	return lop;
 }
 
 // Add or subtract two terms.
-ParserOperator *EquationParser::eval_exp2() {
-	ParserOperator *lop = eval_exp3();
+ParserOperator *EquationParser::eval_exp5() {
+	ParserOperator *lop = eval_exp6();
 	if (lop == NULL)
 		return NULL;
 	register char op1 = *token_;
 	register char op2 = *(token_+1);
 	while ((op1 == '+' || op1 == '-') && op2 != '=') {
 		getToken();
-		ParserOperator *rop = eval_exp3();
+		ParserOperator *rop = eval_exp6();
 		if (rop == NULL) {
 			delete lop;
 			return NULL;
@@ -384,15 +450,15 @@ ParserOperator *EquationParser::eval_exp2() {
 }
 
 // Multiply or divide two factors.
-ParserOperator *EquationParser::eval_exp3() {
-	ParserOperator *lop = eval_exp4();
+ParserOperator *EquationParser::eval_exp6() {
+	ParserOperator *lop = eval_exp7();
 	if (lop == NULL)
 		return NULL;
 	register char op1 = *token_;
 	register char op2 = *(token_+1);
 	while ((op1 == '*' || op1 == '/') && op2 != '=') {
 		getToken();
-		ParserOperator *rop = eval_exp4();
+		ParserOperator *rop = eval_exp7();
 		if (rop == NULL) {
 			delete lop;
 			return NULL;
@@ -413,14 +479,14 @@ ParserOperator *EquationParser::eval_exp3() {
 }
 
 // Process ^ (power) operator.
-ParserOperator *EquationParser::eval_exp4() {
+ParserOperator *EquationParser::eval_exp7() {
 	register char op;
-	ParserOperator *lop = eval_exp5();
+	ParserOperator *lop = eval_exp8();
 	if (lop == NULL)
 		return NULL;
 	while ((op = *token_) == '^') {
 		getToken();
-		ParserOperator *rop = eval_exp5();
+		ParserOperator *rop = eval_exp8();
 		if (rop == NULL) {
 			delete lop;
 			return NULL;
@@ -431,7 +497,7 @@ ParserOperator *EquationParser::eval_exp4() {
 }
 
 // Process a unary + or - and prefix increment/decrement (++ and --)
-ParserOperator *EquationParser::eval_exp5() {
+ParserOperator *EquationParser::eval_exp8() {
 	register char op = 0;
 	if (
 		token_type_ == EquationParser::DELIMITER &&
@@ -443,7 +509,7 @@ ParserOperator *EquationParser::eval_exp5() {
 		if (*token_ == op) {
 			// Increment or Decrement operator
 			getToken();
-			ParserOperator *lop = eval_exp6();
+			ParserOperator *lop = eval_exp9();
 			if (lop == NULL)
 				return NULL;
 			if (dynamic_cast<VariableOperator*>(lop) == NULL) {
@@ -459,7 +525,7 @@ ParserOperator *EquationParser::eval_exp5() {
 		}
 	}
 	// Unary + or - operator
-	ParserOperator *lop = eval_exp6();
+	ParserOperator *lop = eval_exp9();
 	if (lop == NULL)
 		return NULL;
 	if (op == '-')
@@ -468,7 +534,7 @@ ParserOperator *EquationParser::eval_exp5() {
 }
 
 // Process a parenthesized expression
-ParserOperator *EquationParser::eval_exp6() {
+ParserOperator *EquationParser::eval_exp9() {
 	if (*token_ == '(') {
 		getToken();
 		if (*token_ == ')') {
@@ -485,11 +551,11 @@ ParserOperator *EquationParser::eval_exp6() {
 		}
 		getToken();
 		return pop;
-	} else return eval_exp7();
+	} else return eval_exp10();
 }
 
 // Process functions, constant number and variable
-ParserOperator *EquationParser::eval_exp7() {
+ParserOperator *EquationParser::eval_exp10() {
 	ParserOperator *result = NULL;
 	switch (token_type_) {
 		case EquationParser::NUMBER:

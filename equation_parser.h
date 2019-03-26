@@ -145,14 +145,17 @@ public:
 
 private:
 	void getToken();
-	ParserOperator *eval_exp();  // Operator && and ||
-	ParserOperator *eval_exp1(); // Operator =, ==, !=, <, <, <=, >=, +=, -=, *=. /=
-	ParserOperator *eval_exp2(); // Add or subtract two terms.
-	ParserOperator *eval_exp3(); // Multiply or divide two factors.
-	ParserOperator *eval_exp4(); // Process ^ operator.
-	ParserOperator *eval_exp5(); // Process a unary + or - and prefix ++ or --
-	ParserOperator *eval_exp6(); // Process a parenthesized expression , including functions.
-	ParserOperator *eval_exp7(); // Process functions, constant number and variable
+	ParserOperator *eval_exp();  // Operator =, +=, -=, *=, /=
+	ParserOperator *eval_exp1(); // Operator ||
+	ParserOperator *eval_exp2(); // Operator &&
+	ParserOperator *eval_exp3(); // Operator ==, !=
+	ParserOperator *eval_exp4(); // Operator <, <=, >, >=
+	ParserOperator *eval_exp5(); // Add or subtract two terms
+	ParserOperator *eval_exp6(); // Modulo, multiply or divide two factors
+	ParserOperator *eval_exp7(); // Operator ^
+	ParserOperator *eval_exp8(); // Unary + or - and prefix ++ or --
+	ParserOperator *eval_exp9(); // Parenthesized expression
+	ParserOperator *eval_exp10(); // Functions, constant number and variable
 	bool isdelim(char c);
 	void syntaxError(int type);
 	void clearArguments();
