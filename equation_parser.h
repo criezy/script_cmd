@@ -47,6 +47,7 @@ class ParserOperator;
  *   - exp(x), the exponential of x (e raised to the power of x).
  *   - log10(x), the base 10 logarithm of x.
  *   - log(x) or ln(x), the natural logarithm of x.
+ *   - round(x), round x to the nearest integer.
  *   - ceil(x), round x up (the smallest integer bigger or equal to x).
  *   - floor(x), round x down (the biggest integer smaller or equal to x).
  *   - fabs(x) or abs(x), absolute value of x (x if x is positive, -x otherwise).
@@ -68,6 +69,9 @@ class ParserOperator;
  *   - radToDeg(x), converts an angle in radians to degrees.
  *   - min(value1, value2), the minimum of the two given values.
  *   - max(value1, value2), the maximum of the two given values.
+ *   - urand(min, max), a random number between min and max (uniform distribution).
+ *   - nrand(mean, sigma), a random number with a normal (Gaussian) distribution.
+ *   - rands(s), set a seed for the urand() and nrand() functions and return the seed.
  *   - if (x, y, z), if x is true (not equal to zero) return y, otherwise return z.
  *   - print(x), print the value of x and return that value.
  *
@@ -76,6 +80,7 @@ class ParserOperator;
  *   - x - y, substract y from x.
  *   - x * y, multiply x and y.
  *   - x / y, divide x by y.
+ *   - x % y, floating-point remainder of dividing x by y.
  *   - x^y, raise x to the power of y (same as pow(x, y)).
  *   - +x or -x, unary plus and minus operators (change the sign of x).
  *   - x && y, logical and (return true - i.e. 1 - if x and y are not null).

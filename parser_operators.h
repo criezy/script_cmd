@@ -317,6 +317,19 @@ private:
 	ParserOperator *rarg;
 };
 
+class ModuloOperator : public ParserOperator {
+public:
+	ModuloOperator(ParserOperator *left, ParserOperator *right);
+	virtual ~ModuloOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
+
 class SqrtOperator : public ParserOperator {
 public:
 	SqrtOperator(ParserOperator *argument);
@@ -517,6 +530,17 @@ private:
 	ParserOperator *arg;
 };
 
+class RoundOperator : public ParserOperator {
+public:
+	RoundOperator(ParserOperator *argument);
+	virtual ~RoundOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *arg;
+};
+
 class CeilOperator : public ParserOperator {
 public:
 	CeilOperator(ParserOperator *argument);
@@ -608,6 +632,43 @@ private:
 	ParserOperator *rarg;
 };
 
+class URandOperator : public ParserOperator {
+public:
+	URandOperator(ParserOperator *min, ParserOperator *max);
+	virtual ~URandOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *min;
+	ParserOperator *max;
+};
+
+class NRandOperator : public ParserOperator {
+public:
+	NRandOperator(ParserOperator *mean, ParserOperator *sigma);
+	virtual ~NRandOperator();
+
+	virtual double evaluate() const;
+	
+	static double generateValue();
+
+private:
+	ParserOperator *mean;
+	ParserOperator *sigma;
+};
+
+class RandSeedOperator : public ParserOperator {
+public:
+	RandSeedOperator(ParserOperator *seed);
+	virtual ~RandSeedOperator();
+
+	virtual double evaluate() const;
+
+private:
+	ParserOperator *seed;
+};
+
 /***********************************************************
  * Inline Functions implementation
  ***********************************************************/
@@ -665,6 +726,8 @@ inline double DivideOperator::evaluate() const {return larg->evaluate() / rarg->
 
 inline double DivideAndAssignOperator::evaluate() const {return larg->setValue(larg->evaluate() / rarg->evaluate());}
 
+inline double ModuloOperator::evaluate() const {return fmod(larg->evaluate(), rarg->evaluate());}
+
 inline double SqrtOperator::evaluate() const {return sqrt(arg->evaluate());}
 
 inline double CbrtOperator::evaluate() const {return cbrt(arg->evaluate());}
@@ -701,6 +764,11 @@ inline double ACosHOperator::evaluate() const {return acosh(arg->evaluate());}
 
 inline double ATanHOperator::evaluate() const {return atanh(arg->evaluate());}
 
+inline double RoundOperator::evaluate() const {
+	double v = arg->evaluate();
+	return (double)(int)(v < 0. ? (v - 0.5) : (v + 0.5));
+}
+
 inline double CeilOperator::evaluate() const {return ceil(arg->evaluate());}
 
 inline double FloorOperator::evaluate() const {return floor(arg->evaluate());}
@@ -722,6 +790,22 @@ inline double MaximumOperator::evaluate() const {
 	double v1 = larg->evaluate(), v2 = rarg->evaluate();
 	return v1 < v2 ? v2 : v1;
 }
+
+inline double URandOperator::evaluate() const {
+	double minimum = min->evaluate(), maximum = max->evaluate();
+	return minimum + rand() * (maximum - minimum) / RAND_MAX;
+}
+
+inline double NRandOperator::evaluate() const {
+	return mean->evaluate() + sigma->evaluate() * generateValue();
+}
+
+inline double RandSeedOperator::evaluate() const {
+	unsigned int s = (unsigned int)seed->evaluate();
+	srand(s);
+	return (double)s;
+}
+
 
 
 #endif

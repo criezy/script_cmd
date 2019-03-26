@@ -209,6 +209,13 @@ DivideAndAssignOperator::~DivideAndAssignOperator() {
 	delete rarg;
 }
 
+ModuloOperator::ModuloOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
+}
+ModuloOperator::~ModuloOperator() {
+	delete larg;
+	delete rarg;
+}
+
 SqrtOperator::SqrtOperator(ParserOperator *argument) : ParserOperator(), arg(argument){
 }
 SqrtOperator::~SqrtOperator() {
@@ -318,6 +325,12 @@ ATanHOperator::~ATanHOperator() {
 	delete arg;
 }
 
+RoundOperator::RoundOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+}
+RoundOperator::~RoundOperator() {
+	delete arg;
+}
+
 CeilOperator::CeilOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
 }
 CeilOperator::~CeilOperator() {
@@ -370,4 +383,39 @@ MaximumOperator::~MaximumOperator() {
 	delete rarg;
 }
 
+URandOperator::URandOperator(ParserOperator *minimum, ParserOperator *maximum) : ParserOperator(), min(minimum), max(maximum) {
+}
+URandOperator::~URandOperator() {
+	delete min;
+	delete max;
+}
+
+NRandOperator::NRandOperator(ParserOperator *m, ParserOperator *s) : ParserOperator(), mean(m), sigma(s) {
+}
+NRandOperator::~NRandOperator() {
+	delete mean;
+	delete sigma;
+}
+
+double NRandOperator::generateValue() {
+	// Generate a random number using a normal distribution with mean = 0 and sigma = 1.
+	// Method described by Abramowitz and Stegun
+	static double U, V;
+	static int phase = 0;
+	double Z;
+	if (phase == 0) {
+		U = (rand() + 1.) / (RAND_MAX + 2.);
+		V = rand() / (RAND_MAX + 1.);
+		Z = sqrt(-2 * log(U)) * sin(2. * M_PI * V);
+	} else
+		Z = sqrt(-2 * log(U)) * cos(2. * M_PI * V);
+	phase = 1 - phase;
+	return Z;
+}
+
+RandSeedOperator::RandSeedOperator(ParserOperator *s) : ParserOperator(), seed(s) {
+}
+RandSeedOperator::~RandSeedOperator() {
+	delete seed;
+}
 

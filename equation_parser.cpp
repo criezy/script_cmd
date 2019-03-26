@@ -449,14 +449,14 @@ ParserOperator *EquationParser::eval_exp5() {
 	return lop;
 }
 
-// Multiply or divide two factors.
+// Modulo, multiply or divide two factors.
 ParserOperator *EquationParser::eval_exp6() {
 	ParserOperator *lop = eval_exp7();
 	if (lop == NULL)
 		return NULL;
 	char op1 = *token_;
 	char op2 = *(token_+1);
-	while ((op1 == '*' || op1 == '/') && op2 != '=') {
+	while ((op1 == '*' || op1 == '/' || op1 == '%') && op2 != '=') {
 		getToken();
 		ParserOperator *rop = eval_exp7();
 		if (rop == NULL) {
@@ -469,6 +469,9 @@ ParserOperator *EquationParser::eval_exp6() {
 				break;
 			case '/':
 				lop = new DivideOperator(lop, rop);
+				break;
+			case '%':
+				lop = new ModuloOperator(lop, rop);
 				break;
 		}
 		// Set op1 and op2 for next loop
@@ -705,6 +708,12 @@ ParserOperator *EquationParser::eval_exp10() {
 							else result = new PowOperator(lop,rop);
 						}
 					}
+				} else if (strcmp(token_, "round") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new RoundOperator(pop);
 				} else if (strcmp(token_, "ceil") == 0) {
 					getToken(); // skip (
 					getToken();
@@ -840,6 +849,38 @@ ParserOperator *EquationParser::eval_exp10() {
 							else result = new MaximumOperator(lop,rop);
 						}
 					}
+				} else if (strcmp(token_, "urand") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *lop = eval_exp();
+					if (lop) {
+						if (*token_ != ',') delete lop;
+						else {
+							getToken();
+							ParserOperator *rop = eval_exp();
+							if (!rop) delete lop;
+							else result = new URandOperator(lop,rop);
+						}
+					}
+				} else if (strcmp(token_, "nrand") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *lop = eval_exp();
+					if (lop) {
+						if (*token_ != ',') delete lop;
+						else {
+							getToken();
+							ParserOperator *rop = eval_exp();
+							if (!rop) delete lop;
+							else result = new NRandOperator(lop,rop);
+						}
+					}
+				} else if (strcmp(token_, "rands") == 0) {
+					getToken(); // skip (
+					getToken();
+					ParserOperator *pop = eval_exp();
+					if (pop != NULL)
+						result = new RandSeedOperator(pop);
 				} else if (strcmp(token_, "if") == 0) {
 					getToken(); // skip (
 					getToken();
