@@ -578,7 +578,7 @@ ParserOperator *EquationParser::eval_exp10() {
 					unsigned long long int nb = 0;
 					while (*temp != 0) {
 						nb <<= 3;
-						nb += (*temp++ - '0');
+						nb += (unsigned long long int)(*temp++ - '0');
 					};
 					result = new ConstantOperator((double)nb);
 				}
@@ -589,7 +589,7 @@ ParserOperator *EquationParser::eval_exp10() {
 					unsigned long long int nb = 0;
 					while (*temp != 0) {
 						nb <<= 4;
-						nb += isdigit(*temp) ? (*temp - '0') : (10 + tolower(*temp) - 'a');
+						nb += (unsigned long long int)(isdigit(*temp) ? (*temp - '0') : (10 + tolower(*temp) - 'a'));
 						++temp;
 					};
 					result = new ConstantOperator((double)nb);
