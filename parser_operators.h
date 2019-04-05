@@ -49,13 +49,14 @@ protected:
 
 class ConstantOperator : public ParserOperator {
 public:
-	ConstantOperator(double c);
+	ConstantOperator(double c, const String& name = String());
 	virtual ~ConstantOperator();
 
 	virtual double evaluate() const;
 
 private:
 	double var_dbl;
+	String name_;
 };
 
 class VariableOperator : public ParserOperator {
@@ -99,104 +100,92 @@ private:
 	ParserOperator *rarg;
 };
 
+class ParserOperator1 : public ParserOperator {
+public:
+	virtual ~ParserOperator1();
 
-class OrOperator : public ParserOperator {
+protected:
+	ParserOperator1(ParserOperator *argument);
+
+	ParserOperator *arg;
+};
+
+class ParserOperator2 : public ParserOperator {
+public:
+	virtual ~ParserOperator2();
+
+protected:
+	ParserOperator2(ParserOperator *left, ParserOperator *right);
+
+	ParserOperator *larg;
+	ParserOperator *rarg;
+};
+
+class OrOperator : public ParserOperator2 {
 public:
 	OrOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~OrOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class AndOperator : public ParserOperator {
+class AndOperator : public ParserOperator2 {
 public:
 	AndOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~AndOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class EqualOperator : public ParserOperator {
+class EqualOperator : public ParserOperator2 {
 public:
 	EqualOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~EqualOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class GreaterOperator : public ParserOperator {
+class GreaterOperator : public ParserOperator2 {
 public:
 	GreaterOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~GreaterOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class SmallerOperator : public ParserOperator {
+class SmallerOperator : public ParserOperator2 {
 public:
 	SmallerOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~SmallerOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class EqualOrGreaterOperator : public ParserOperator {
+class EqualOrGreaterOperator : public ParserOperator2 {
 public:
 	EqualOrGreaterOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~EqualOrGreaterOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class EqualOrSmallerOperator : public ParserOperator {
+class EqualOrSmallerOperator : public ParserOperator2 {
 public:
 	EqualOrSmallerOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~EqualOrSmallerOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class NotEqualOperator : public ParserOperator {
+class NotEqualOperator : public ParserOperator2 {
 public:
 	NotEqualOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~NotEqualOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class AssignmentOperator : public ParserOperator {
+class AssignmentOperator : public ParserOperator2 {
 public:
 	AssignmentOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~AssignmentOperator();
@@ -205,446 +194,315 @@ public:
 	
 	virtual bool canBeModified() const;
 	virtual double setValue(double value);
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class IncrementOperator : public ParserOperator {
+class IncrementOperator : public ParserOperator2 {
 public:
 	IncrementOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~IncrementOperator();
  
 	virtual double evaluate() const;
- 
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class SignOperator : public ParserOperator {
+class SignOperator : public ParserOperator1 {
 public:
 	SignOperator(ParserOperator* argument);
 	virtual ~SignOperator();
 
 	virtual double evaluate() const;
-	
-private:
-	ParserOperator *arg;
 };
 
-class NSignOperator : public ParserOperator {
+class NSignOperator : public ParserOperator1 {
 public:
 	NSignOperator(ParserOperator *argument);
 	virtual ~NSignOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class PlusOperator : public ParserOperator {
+class PlusOperator : public ParserOperator2 {
 public:
 	PlusOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~PlusOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class MinusOperator : public ParserOperator {
+class MinusOperator : public ParserOperator2 {
 public:
 	MinusOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~MinusOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class MultiplyOperator : public ParserOperator {
+class MultiplyOperator : public ParserOperator2 {
 public:
 	MultiplyOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~MultiplyOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class MultiplyAndAssignOperator : public ParserOperator {
+class MultiplyAndAssignOperator : public ParserOperator2 {
 public:
 	MultiplyAndAssignOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~MultiplyAndAssignOperator();
  
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class DivideOperator : public ParserOperator {
+class DivideOperator : public ParserOperator2 {
 public:
 	DivideOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~DivideOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class DivideAndAssignOperator : public ParserOperator {
+class DivideAndAssignOperator : public ParserOperator2 {
 public:
 	DivideAndAssignOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~DivideAndAssignOperator();
  
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class ModuloOperator : public ParserOperator {
+class ModuloOperator : public ParserOperator2 {
 public:
 	ModuloOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~ModuloOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
 
-class SqrtOperator : public ParserOperator {
+class SqrtOperator : public ParserOperator1 {
 public:
 	SqrtOperator(ParserOperator *argument);
 	virtual ~SqrtOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class CbrtOperator : public ParserOperator {
+class CbrtOperator : public ParserOperator1 {
 public:
 	CbrtOperator(ParserOperator *argument);
 	virtual ~CbrtOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class CosOperator : public ParserOperator {
+class CosOperator : public ParserOperator1 {
 public:
 	CosOperator(ParserOperator *argument);
 	virtual ~CosOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class SinOperator : public ParserOperator {
+class SinOperator : public ParserOperator1 {
 public:
 	SinOperator(ParserOperator *argument);
 	virtual ~SinOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class TanOperator : public ParserOperator {
+class TanOperator : public ParserOperator1 {
 public:
 	TanOperator(ParserOperator *argument);
 	virtual ~TanOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class ExpOperator : public ParserOperator {
+class ExpOperator : public ParserOperator1 {
 public:
 	ExpOperator(ParserOperator *argument);
 	virtual ~ExpOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class LogOperator : public ParserOperator {
+class LogOperator : public ParserOperator1 {
 public:
 	LogOperator(ParserOperator *argument);
 	virtual ~LogOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class Log10Operator : public ParserOperator {
+class Log10Operator : public ParserOperator1 {
 public:
 	Log10Operator(ParserOperator *argument);
 	virtual ~Log10Operator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class ASinOperator : public ParserOperator {
+class ASinOperator : public ParserOperator1 {
 public:
 	ASinOperator(ParserOperator *argument);
 	virtual ~ASinOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class ACosOperator : public ParserOperator {
+class ACosOperator : public ParserOperator1 {
 public:
 	ACosOperator(ParserOperator *argument);
 	virtual ~ACosOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
 
-class ATanOperator : public ParserOperator {
+class ATanOperator : public ParserOperator1 {
 public:
 	ATanOperator(ParserOperator *argument);
 	virtual ~ATanOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class ATan2Operator : public ParserOperator {
+class ATan2Operator : public ParserOperator2 {
 public:
 	ATan2Operator(ParserOperator *left, ParserOperator *right);
 	virtual ~ATan2Operator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class SinHOperator : public ParserOperator {
+class SinHOperator : public ParserOperator1 {
 public:
 	SinHOperator(ParserOperator *argument);
 	virtual ~SinHOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class CosHOperator : public ParserOperator {
+class CosHOperator : public ParserOperator1 {
 public:
 	CosHOperator(ParserOperator *argument);
 	virtual ~CosHOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class TanHOperator : public ParserOperator {
+class TanHOperator : public ParserOperator1 {
 public:
 	TanHOperator(ParserOperator *argument);
 	virtual ~TanHOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class ASinHOperator : public ParserOperator {
+class ASinHOperator : public ParserOperator1 {
 public:
 	ASinHOperator(ParserOperator *argument);
 	virtual ~ASinHOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class ACosHOperator : public ParserOperator {
+class ACosHOperator : public ParserOperator1 {
 public:
 	ACosHOperator(ParserOperator *argument);
 	virtual ~ACosHOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class ATanHOperator : public ParserOperator {
+class ATanHOperator : public ParserOperator1 {
 public:
 	ATanHOperator(ParserOperator *argument);
 	virtual ~ATanHOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class RoundOperator : public ParserOperator {
+class RoundOperator : public ParserOperator1 {
 public:
 	RoundOperator(ParserOperator *argument);
 	virtual ~RoundOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class CeilOperator : public ParserOperator {
+class CeilOperator : public ParserOperator1 {
 public:
 	CeilOperator(ParserOperator *argument);
 	virtual ~CeilOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class FloorOperator : public ParserOperator {
+class FloorOperator : public ParserOperator1 {
 public:
 	FloorOperator(ParserOperator *argument);
 	virtual ~FloorOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class FAbsOperator : public ParserOperator {
+class FAbsOperator : public ParserOperator1 {
 public:
 	FAbsOperator(ParserOperator *argument);
 	virtual ~FAbsOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class PowOperator : public ParserOperator {
+class PowOperator : public ParserOperator2 {
 public:
 	PowOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~PowOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class Deg2RadOperator : public ParserOperator {
+class Deg2RadOperator : public ParserOperator1 {
 public:
 	Deg2RadOperator(ParserOperator *argument);
 	virtual ~Deg2RadOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class Rad2DegOperator : public ParserOperator {
+class Rad2DegOperator : public ParserOperator1 {
 public:
 	Rad2DegOperator(ParserOperator *argument);
 	virtual ~Rad2DegOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *arg;
 };
 
-class MinimumOperator : public ParserOperator {
+class MinimumOperator : public ParserOperator2 {
 public:
 	MinimumOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~MinimumOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class MaximumOperator : public ParserOperator {
+class MaximumOperator : public ParserOperator2 {
 public:
 	MaximumOperator(ParserOperator *left, ParserOperator *right);
 	virtual ~MaximumOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *larg;
-	ParserOperator *rarg;
 };
 
-class URandOperator : public ParserOperator {
+class URandOperator : public ParserOperator2 {
 public:
 	URandOperator(ParserOperator *min, ParserOperator *max);
 	virtual ~URandOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *min;
-	ParserOperator *max;
 };
 
-class NRandOperator : public ParserOperator {
+class NRandOperator : public ParserOperator2 {
 public:
 	NRandOperator(ParserOperator *mean, ParserOperator *sigma);
 	virtual ~NRandOperator();
@@ -652,21 +510,14 @@ public:
 	virtual double evaluate() const;
 	
 	static double generateValue();
-
-private:
-	ParserOperator *mean;
-	ParserOperator *sigma;
 };
 
-class RandSeedOperator : public ParserOperator {
+class RandSeedOperator : public ParserOperator1 {
 public:
 	RandSeedOperator(ParserOperator *seed);
 	virtual ~RandSeedOperator();
 
 	virtual double evaluate() const;
-
-private:
-	ParserOperator *seed;
 };
 
 /***********************************************************
@@ -792,16 +643,16 @@ inline double MaximumOperator::evaluate() const {
 }
 
 inline double URandOperator::evaluate() const {
-	double minimum = min->evaluate(), maximum = max->evaluate();
+	double minimum = larg->evaluate(), maximum = rarg->evaluate();
 	return minimum + rand() * (maximum - minimum) / RAND_MAX;
 }
 
 inline double NRandOperator::evaluate() const {
-	return mean->evaluate() + sigma->evaluate() * generateValue();
+	return larg->evaluate() + rarg->evaluate() * generateValue();
 }
 
 inline double RandSeedOperator::evaluate() const {
-	unsigned int s = (unsigned int)seed->evaluate();
+	unsigned int s = (unsigned int)arg->evaluate();
 	srand(s);
 	return (double)s;
 }

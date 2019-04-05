@@ -26,19 +26,14 @@ ParserOperator::ParserOperator() {}
 ParserOperator::~ParserOperator() {}
 
 
-ConstantOperator::ConstantOperator(double c) : ParserOperator(), var_dbl(c) {
-}
+ConstantOperator::ConstantOperator(double c, const String& name) : ParserOperator(), var_dbl(c), name_(name) {}
 ConstantOperator::~ConstantOperator() {}
 
-VariableOperator::VariableOperator(double *vardbl, const String& name) : ParserOperator(), var_dbl(vardbl), name_(name) {
-}
-VariableOperator::~VariableOperator() {
-}
+VariableOperator::VariableOperator(double *vardbl, const String& name) : ParserOperator(), var_dbl(vardbl), name_(name) {}
+VariableOperator::~VariableOperator() {}
 
 PrintOperator::PrintOperator(const List<ParserOperator*>& values, const StringList& strings) :
-	ParserOperator(), values_(values), strings_(strings)
-{
-}
+	ParserOperator(), values_(values), strings_(strings) {}
 PrintOperator::~PrintOperator() {
 	for (int i = 0 ; i < values_.size() ; ++i)
 		delete values_[i];
@@ -73,23 +68,28 @@ double PrintOperator::evaluate() const {
 	return value;
 }
 
-SignOperator::SignOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
+ParserOperator1::ParserOperator1(ParserOperator *argument) : ParserOperator(), arg(argument) {}
 
-SignOperator::~SignOperator() {
+ParserOperator1::~ParserOperator1() {
 	delete arg;
 }
 
-NSignOperator::NSignOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
+ParserOperator2::ParserOperator2(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {}
+
+ParserOperator2::~ParserOperator2() {
+	delete larg;
+	delete rarg;
 }
-NSignOperator::~NSignOperator() {
-	delete arg;
-}
+
+SignOperator::SignOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+
+SignOperator::~SignOperator() {}
+
+NSignOperator::NSignOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+NSignOperator::~NSignOperator() {}
 
 IfOperator::IfOperator(ParserOperator *test_exp, ParserOperator *left, ParserOperator *right) :
-	ParserOperator(), test(test_exp), larg(left), rarg(right)
-{
-}
+	ParserOperator(), test(test_exp), larg(left), rarg(right) {}
 
 IfOperator::~IfOperator() {
 	delete test;
@@ -97,305 +97,144 @@ IfOperator::~IfOperator() {
 	delete rarg;
 }
 
-OrOperator::OrOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-OrOperator::~OrOperator() {
-	delete larg;
-	delete rarg;
-}
+OrOperator::OrOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+OrOperator::~OrOperator() {}
 
-AndOperator::AndOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-AndOperator::~AndOperator() {
-	delete larg;
-	delete rarg;
-}
+AndOperator::AndOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+AndOperator::~AndOperator() {}
 
-EqualOperator::EqualOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-EqualOperator::~EqualOperator() {
-	delete larg;
-	delete rarg;
-}
+EqualOperator::EqualOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+EqualOperator::~EqualOperator() {}
 
-GreaterOperator::GreaterOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-GreaterOperator::~GreaterOperator() {
-	delete larg;
-	delete rarg;
-}
+GreaterOperator::GreaterOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+GreaterOperator::~GreaterOperator() {}
 
-SmallerOperator::SmallerOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-SmallerOperator::~SmallerOperator() {
-	delete larg;
-	delete rarg;
-}
+SmallerOperator::SmallerOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+SmallerOperator::~SmallerOperator() {}
 
-EqualOrGreaterOperator::EqualOrGreaterOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-EqualOrGreaterOperator::~EqualOrGreaterOperator() {
-	delete larg;
-	delete rarg;
-}
+EqualOrGreaterOperator::EqualOrGreaterOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+EqualOrGreaterOperator::~EqualOrGreaterOperator() {}
 
-EqualOrSmallerOperator::EqualOrSmallerOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-EqualOrSmallerOperator::~EqualOrSmallerOperator() {
-	delete larg;
-	delete rarg;
-}
+EqualOrSmallerOperator::EqualOrSmallerOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+EqualOrSmallerOperator::~EqualOrSmallerOperator() {}
 
-NotEqualOperator::NotEqualOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-NotEqualOperator::~NotEqualOperator() {
-	delete larg;
-	delete rarg;
-}
+NotEqualOperator::NotEqualOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+NotEqualOperator::~NotEqualOperator() {}
 
-AssignmentOperator::AssignmentOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-AssignmentOperator::~AssignmentOperator() {
-	delete larg;
-	delete rarg;
-}
+AssignmentOperator::AssignmentOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+AssignmentOperator::~AssignmentOperator() {}
 
-IncrementOperator::IncrementOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-IncrementOperator::~IncrementOperator() {
-	delete larg;
-	delete rarg;
-}
+IncrementOperator::IncrementOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+IncrementOperator::~IncrementOperator() {}
 
-PlusOperator::PlusOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-PlusOperator::~PlusOperator() {
-	delete larg;
-	delete rarg;
-}
+PlusOperator::PlusOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+PlusOperator::~PlusOperator() {}
 
-MinusOperator::MinusOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-MinusOperator::~MinusOperator() {
-	delete larg;
-	delete rarg;
-}
+MinusOperator::MinusOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+MinusOperator::~MinusOperator() {}
 
-MultiplyOperator::MultiplyOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-MultiplyOperator::~MultiplyOperator() {
-	delete larg;
-	delete rarg;
-}
+MultiplyOperator::MultiplyOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+MultiplyOperator::~MultiplyOperator() {}
 
-MultiplyAndAssignOperator::MultiplyAndAssignOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-MultiplyAndAssignOperator::~MultiplyAndAssignOperator() {
-	delete larg;
-	delete rarg;
-}
+MultiplyAndAssignOperator::MultiplyAndAssignOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+MultiplyAndAssignOperator::~MultiplyAndAssignOperator() {}
 
-DivideOperator::DivideOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-DivideOperator::~DivideOperator() {
-	delete larg;
-	delete rarg;
-}
+DivideOperator::DivideOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+DivideOperator::~DivideOperator() {}
 
-DivideAndAssignOperator::DivideAndAssignOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-DivideAndAssignOperator::~DivideAndAssignOperator() {
-	delete larg;
-	delete rarg;
-}
+DivideAndAssignOperator::DivideAndAssignOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+DivideAndAssignOperator::~DivideAndAssignOperator() {}
 
-ModuloOperator::ModuloOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-ModuloOperator::~ModuloOperator() {
-	delete larg;
-	delete rarg;
-}
+ModuloOperator::ModuloOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+ModuloOperator::~ModuloOperator() {}
 
-SqrtOperator::SqrtOperator(ParserOperator *argument) : ParserOperator(), arg(argument){
-}
-SqrtOperator::~SqrtOperator() {
-	delete arg;
-}
+SqrtOperator::SqrtOperator(ParserOperator *argument) : ParserOperator1(argument){}
+SqrtOperator::~SqrtOperator() {}
 
-CbrtOperator::CbrtOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-CbrtOperator::~CbrtOperator() {
-	delete arg;
-}
+CbrtOperator::CbrtOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+CbrtOperator::~CbrtOperator() {}
 
-CosOperator::CosOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-CosOperator::~CosOperator() {
-	delete arg;
-}
+CosOperator::CosOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+CosOperator::~CosOperator() {}
 
-SinOperator::SinOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-SinOperator::~SinOperator() {
-	delete arg;
-}
+SinOperator::SinOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+SinOperator::~SinOperator() {}
 
-TanOperator::TanOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-TanOperator::~TanOperator() {
-	delete arg;
-}
+TanOperator::TanOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+TanOperator::~TanOperator() {}
 
-ExpOperator::ExpOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-ExpOperator::~ExpOperator() {
-	delete arg;
-}
+ExpOperator::ExpOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+ExpOperator::~ExpOperator() {}
 
-LogOperator::LogOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-LogOperator::~LogOperator() {
-	delete arg;
-}
+LogOperator::LogOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+LogOperator::~LogOperator() {}
 
-Log10Operator::Log10Operator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-Log10Operator::~Log10Operator() {
-	delete arg;
-}
+Log10Operator::Log10Operator(ParserOperator *argument) : ParserOperator1(argument) {}
+Log10Operator::~Log10Operator() {}
 
-ASinOperator::ASinOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-ASinOperator::~ASinOperator() {
-	delete arg;
-}
+ASinOperator::ASinOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+ASinOperator::~ASinOperator() {}
 
-ACosOperator::ACosOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-ACosOperator::~ACosOperator() {
-	delete arg;
-}
+ACosOperator::ACosOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+ACosOperator::~ACosOperator() {}
 
-ATanOperator::ATanOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-ATanOperator::~ATanOperator() {
-	delete arg;
-}
+ATanOperator::ATanOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+ATanOperator::~ATanOperator() {}
 
-ATan2Operator::ATan2Operator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-ATan2Operator::~ATan2Operator() {
-	delete larg;
-	delete rarg;
-}
+ATan2Operator::ATan2Operator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+ATan2Operator::~ATan2Operator() {}
 
-SinHOperator::SinHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-SinHOperator::~SinHOperator() {
-	delete arg;
-}
+SinHOperator::SinHOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+SinHOperator::~SinHOperator() {}
 
-CosHOperator::CosHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-CosHOperator::~CosHOperator() {
-	delete arg;
-}
+CosHOperator::CosHOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+CosHOperator::~CosHOperator() {}
 
-TanHOperator::TanHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-TanHOperator::~TanHOperator() {
-	delete arg;
-}
+TanHOperator::TanHOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+TanHOperator::~TanHOperator() {}
 
-ASinHOperator::ASinHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-ASinHOperator::~ASinHOperator() {
-	delete arg;
-}
+ASinHOperator::ASinHOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+ASinHOperator::~ASinHOperator() {}
 
-ACosHOperator::ACosHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-ACosHOperator::~ACosHOperator() {
-	delete arg;
-}
+ACosHOperator::ACosHOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+ACosHOperator::~ACosHOperator() {}
 
-ATanHOperator::ATanHOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-ATanHOperator::~ATanHOperator() {
-	delete arg;
-}
+ATanHOperator::ATanHOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+ATanHOperator::~ATanHOperator() {}
 
-RoundOperator::RoundOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-RoundOperator::~RoundOperator() {
-	delete arg;
-}
+RoundOperator::RoundOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+RoundOperator::~RoundOperator() {}
 
-CeilOperator::CeilOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-CeilOperator::~CeilOperator() {
-	delete arg;
-}
+CeilOperator::CeilOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+CeilOperator::~CeilOperator() {}
 
-FloorOperator::FloorOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-FloorOperator::~FloorOperator() {
-	delete arg;
-}
+FloorOperator::FloorOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+FloorOperator::~FloorOperator() {}
 
-FAbsOperator::FAbsOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-FAbsOperator::~FAbsOperator() {
-	delete arg;
-}
+FAbsOperator::FAbsOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+FAbsOperator::~FAbsOperator() {}
 
 
-PowOperator::PowOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-PowOperator::~PowOperator() {
-	delete larg;
-	delete rarg;
-}
+PowOperator::PowOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+PowOperator::~PowOperator() {}
 
-Deg2RadOperator::Deg2RadOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-Deg2RadOperator::~Deg2RadOperator() {
-	delete arg;
-}
+Deg2RadOperator::Deg2RadOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+Deg2RadOperator::~Deg2RadOperator() {}
 
-Rad2DegOperator::Rad2DegOperator(ParserOperator *argument) : ParserOperator(), arg(argument) {
-}
-Rad2DegOperator::~Rad2DegOperator() {
-	delete arg;
-}
+Rad2DegOperator::Rad2DegOperator(ParserOperator *argument) : ParserOperator1(argument) {}
+Rad2DegOperator::~Rad2DegOperator() {}
 
-MinimumOperator::MinimumOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-MinimumOperator::~MinimumOperator() {
-	delete larg;
-	delete rarg;
-}
+MinimumOperator::MinimumOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+MinimumOperator::~MinimumOperator() {}
 
-MaximumOperator::MaximumOperator(ParserOperator *left, ParserOperator *right) : ParserOperator(), larg(left), rarg(right) {
-}
-MaximumOperator::~MaximumOperator() {
-	delete larg;
-	delete rarg;
-}
+MaximumOperator::MaximumOperator(ParserOperator *left, ParserOperator *right) : ParserOperator2(left, right) {}
+MaximumOperator::~MaximumOperator() {}
 
-URandOperator::URandOperator(ParserOperator *minimum, ParserOperator *maximum) : ParserOperator(), min(minimum), max(maximum) {
-}
-URandOperator::~URandOperator() {
-	delete min;
-	delete max;
-}
+URandOperator::URandOperator(ParserOperator *minimum, ParserOperator *maximum) : ParserOperator2(minimum, maximum) {}
+URandOperator::~URandOperator() {}
 
-NRandOperator::NRandOperator(ParserOperator *m, ParserOperator *s) : ParserOperator(), mean(m), sigma(s) {
-}
-NRandOperator::~NRandOperator() {
-	delete mean;
-	delete sigma;
-}
+NRandOperator::NRandOperator(ParserOperator *mean, ParserOperator *sigma) : ParserOperator2(mean, sigma) {}
+NRandOperator::~NRandOperator() {}
 
 double NRandOperator::generateValue() {
 	// Generate a random number using a normal distribution with mean = 0 and sigma = 1.
@@ -413,9 +252,6 @@ double NRandOperator::generateValue() {
 	return Z;
 }
 
-RandSeedOperator::RandSeedOperator(ParserOperator *s) : ParserOperator(), seed(s) {
-}
-RandSeedOperator::~RandSeedOperator() {
-	delete seed;
-}
+RandSeedOperator::RandSeedOperator(ParserOperator *seed) : ParserOperator1(seed) {}
+RandSeedOperator::~RandSeedOperator() {}
 

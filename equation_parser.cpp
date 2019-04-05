@@ -606,7 +606,7 @@ ParserOperator *EquationParser::eval_exp10() {
 		case EquationParser::VARIABLE: {
 				// Built-in variables
 				if (strcmp(token_, "PI") == 0) {
-					result = new ConstantOperator(M_PI);
+					result = new ConstantOperator(M_PI, "PI");
 					break;
 				}
 				// look if variable exists
