@@ -58,6 +58,27 @@ Type 'help' to get some help.
 > sqrt(3 + 12 / 5)
 2.32379000772
 
+You can also use variables. Use 'define VAR' to define a variable and 'undefine VAR'
+to undefine a previously defined variable. You can also use 'variables' to list the
+defined variables.
+For example:
+$ ./script -e
+Starting simple equation mode.
+Type 'help' to get some help.
+> define a
+> define b cos(PI / 3)
+0.5
+> variables
+There are 2 variables defined:
+a = 0.000000
+b = 0.500000
+> a + b
+0.5
+> undefine a
+> variables
+There is 1 variable defined:
+b = 0.500000
+
 If you enabled the tree debug feature at compile time, you can use the
 tree <equation> command to print the parser tree for the given equation.
 For example:
