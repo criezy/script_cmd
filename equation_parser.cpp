@@ -22,6 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <iostream>
 
 String EquationParser::nullStr_;
 
@@ -985,4 +986,50 @@ void EquationParser::syntaxError(int type) {
 	if (!error.isEmpty())
 		errors_ << error;
 }
+
+#ifdef PARSER_TREE_DEBUG
+EquationParser::ParserTreeNode EquationParser::getParserTreeDescription() const {
+	return buildNode(start_point_);
+}
+ 
+EquationParser::ParserTreeNode EquationParser::buildNode(const ParserOperator* op) const {
+	EquationParser::ParserTreeNode node;
+	if (op == NULL) {
+		node.description_ = "(Empty)";
+		return node;
+	}
+ 
+	node.description_ = op->operatorName();
+	int nb_children = op->nbChildren();
+	for (int i = 0 ; i < nb_children ; ++i)
+		node.children_ << buildNode(op->child(i));
+ 
+	// Use dynamic_cast to improve a bit the tree for some specific operators.
+	if (dynamic_cast<const IfOperator*>(op) != NULL) {
+		// Rearange the three children to clearly indicate the If/Then/Else structure
+		if (node.children_.size() == 3) {
+			EquationParser::ParserTreeNode cond_node;
+			cond_node.description_ = "Condition";
+			cond_node.children_ << node.children_[0];
+			node.children_[0] = cond_node;
+			cond_node.description_ = "Then";
+			cond_node.children_.clear();
+			cond_node.children_ << node.children_[1];
+			node.children_[1] = cond_node;
+			cond_node.description_ = "Else";
+			cond_node.children_.clear();
+			cond_node.children_ << node.children_[2];
+			node.children_[2] = cond_node;
+		}
+	}
+ 
+	return node;
+}
+ 
+void EquationParser::debugPrint(const ParserTreeNode& node, const String& prefix) {
+	std::cout << prefix.c_str() << node.description_.c_str() << std::endl;
+	for (int i = 0 ; i < node.children_.size() ; ++i)
+		debugPrint(node.children_.at(i), prefix + "  ");
+}
+#endif
 

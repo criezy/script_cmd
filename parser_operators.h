@@ -27,6 +27,10 @@
 #include "strlist.h"
 #include "math_utils.h"
 
+#ifdef PARSER_TREE_DEBUG
+#include <typeinfo>
+#endif
+
 /*! \class ParserOperator
  *
  * This is an internal class for the EquationParser. It is the base
@@ -43,6 +47,12 @@ public:
 	virtual bool canBeModified() const;
 	virtual double setValue(double value);
 
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return typeid(*this).name(); }
+	virtual int nbChildren() const { return 0; }
+	virtual ParserOperator* child(int) const { return NULL; }
+#endif
+
 protected:
 	ParserOperator();
 };
@@ -53,6 +63,14 @@ public:
 	virtual ~ConstantOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const {
+		if (name_.isEmpty())
+			return String::format("Constant: %f", var_dbl);
+		return String::format("Constant: %s (%f)", name_.c_str(), var_dbl);
+	}
+#endif
 
 private:
 	double var_dbl;
@@ -70,6 +88,12 @@ public:
 	virtual double setValue(double value);
 	const String& name() const;
 
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const {
+		return String::format("Variable: %s", name_.c_str());
+	}
+#endif
+
 private:
 	double *var_dbl;
 	String name_;
@@ -81,6 +105,30 @@ public:
 	virtual ~PrintOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual int nbChildren() const {
+		int cpt = 0;
+		for (int i = 0 ; i < values_.size() ; ++i)
+			if (values_[i] != NULL)
+				++cpt;
+		return cpt;
+	}
+	virtual ParserOperator* child(int idx) const {
+		if (idx < 0)
+			return NULL;
+		int cpt = 0;
+		for (int i = 0 ; i < values_.size() ; ++i) {
+			if (values_[i] != NULL) {
+				if (idx == cpt)
+					return values_[i];
+				else
+					++cpt;
+			}
+		}
+		return NULL;
+	}
+#endif
 
 private:
 	List<ParserOperator*> values_;
@@ -94,6 +142,11 @@ public:
 
 	virtual double evaluate() const;
 
+#ifdef PARSER_TREE_DEBUG
+	virtual int nbChildren() const { return 3; }
+	virtual ParserOperator* child(int i) const { return i == 0 ? test : (i == 1 ? larg : (i == 2 ? rarg : NULL)); }
+#endif
+
 private:
 	ParserOperator *test;
 	ParserOperator *larg;
@@ -104,6 +157,11 @@ class ParserOperator1 : public ParserOperator {
 public:
 	virtual ~ParserOperator1();
 
+#ifdef PARSER_TREE_DEBUG
+	virtual int nbChildren() const { return 1; }
+	virtual ParserOperator* child(int i) const { return i == 0 ? arg : NULL; }
+#endif
+
 protected:
 	ParserOperator1(ParserOperator *argument);
 
@@ -113,6 +171,11 @@ protected:
 class ParserOperator2 : public ParserOperator {
 public:
 	virtual ~ParserOperator2();
+
+#ifdef PARSER_TREE_DEBUG
+	virtual int nbChildren() const { return 2; }
+	virtual ParserOperator* child(int i) const { return i == 0 ? larg : (i == 1 ? rarg : NULL); }
+#endif
 
 protected:
 	ParserOperator2(ParserOperator *left, ParserOperator *right);

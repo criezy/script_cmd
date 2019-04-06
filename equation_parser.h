@@ -147,6 +147,16 @@ public:
 	int nbErrors() const;
 	const String& getError(int) const;
 	const String& getLastError() const;
+	
+#ifdef PARSER_TREE_DEBUG
+	struct ParserTreeNode {
+        String description_;
+        List<ParserTreeNode> children_;
+    };
+    ParserTreeNode getParserTreeDescription() const;
+	ParserTreeNode buildNode(const ParserOperator*) const;
+    static void debugPrint(const ParserTreeNode&, const String& prefix = String());
+#endif
 
 private:
 	void getToken();

@@ -75,10 +75,14 @@ void printEquationModuleHelp(int mode) {
 		printf("  - x >= y    Return true if x is greater or equal than y.\n");
 		printf("  - x = y     Asignement (set x to y and return y).\n");
 		break;
+	case 4:
+		printf("The recognized debug commands are:\n");
+		printf("  - tree <equation>  Prints the parser tree for the given equation.\n");
+		break;
 	default:
 		printf("Evaluates C-like mathematical expressions.\n");
 		printf("Type 'help topic' to get help on a specific topic.\n");
-		printf("Topics are: 'constants', 'functions', 'operators'\n");
+		printf("Topics are: 'constants', 'functions', 'operators', 'debug'\n");
 		printf("Type 'quit' or 'exit' to quit the program.\n");
 		break;
 	}
@@ -137,12 +141,31 @@ void runEquationModule() {
 				t = 2;
 			else if (topic == "operators")
 				t = 3;
+			else if (topic == "debug")
+				t = 4;
 			printEquationModuleHelp(t);
 			continue;
 		}
 
-		// Treat it as an equation
-		if (!parser.parse(line, variables)) {
+		// Handle Equation
+#ifdef PARSER_TREE_DEBUG
+		bool tree_debug = false;
+#endif
+		String equation;
+		if (line.startsWith("tree") && (line.length() == 4 || isspace(line[4]))) {
+#ifdef PARSER_TREE_DEBUG
+			equation = line.right(4).trimmed();
+			tree_debug = true;
+#else
+			printf("The parser tree debugging feature is disabled. You need to recompile the executable with the feature enabled before you can use it.\n");
+#endif
+		} else
+			equation = line;
+		if (equation.isEmpty())
+			continue;
+
+		// Parse the equation
+		if (!parser.parse(equation, variables)) {
 			if (parser.nbErrors() == 0)
 				printf("Syntax error...\n");
 			else {
@@ -152,6 +175,10 @@ void runEquationModule() {
 			}
 			continue;
 		}
+#ifdef PARSER_TREE_DEBUG
+		if (tree_debug)
+			EquationParser::debugPrint(parser.getParserTreeDescription());
+#endif
 		printf("%.12g\n", parser.evaluate());
 	}
 }

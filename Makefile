@@ -6,6 +6,9 @@ LDFLAGS=
 #CPPFLAGS += -DUSE_READLINE
 #LDFLAGS += -lreadline
 
+# To enable the parser tree debug code
+#CPPFLAGS += -DPARSER_TREE_DEBUG
+
 SOURCES=\
 	str.cpp\
 	strstream.cpp\
