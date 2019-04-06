@@ -107,6 +107,7 @@ public:
 	virtual double evaluate() const;
 
 #ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Print"; }
 	virtual int nbChildren() const {
 		int cpt = 0;
 		for (int i = 0 ; i < values_.size() ; ++i)
@@ -143,6 +144,7 @@ public:
 	virtual double evaluate() const;
 
 #ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "If"; }
 	virtual int nbChildren() const { return 3; }
 	virtual ParserOperator* child(int i) const { return i == 0 ? test : (i == 1 ? larg : (i == 2 ? rarg : NULL)); }
 #endif
@@ -190,6 +192,10 @@ public:
 	virtual ~OrOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Or"; }
+#endif
 };
 
 class AndOperator : public ParserOperator2 {
@@ -198,6 +204,10 @@ public:
 	virtual ~AndOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "And"; }
+#endif
 };
 
 class EqualOperator : public ParserOperator2 {
@@ -206,6 +216,10 @@ public:
 	virtual ~EqualOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Is equal"; }
+#endif
 };
 
 class GreaterOperator : public ParserOperator2 {
@@ -214,6 +228,10 @@ public:
 	virtual ~GreaterOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Is greater"; }
+#endif
 };
 
 class SmallerOperator : public ParserOperator2 {
@@ -222,6 +240,10 @@ public:
 	virtual ~SmallerOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Is smaller"; }
+#endif
 };
 
 class EqualOrGreaterOperator : public ParserOperator2 {
@@ -230,6 +252,10 @@ public:
 	virtual ~EqualOrGreaterOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Is equal or greater"; }
+#endif
 };
 
 class EqualOrSmallerOperator : public ParserOperator2 {
@@ -238,6 +264,10 @@ public:
 	virtual ~EqualOrSmallerOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Is equal or smaller"; }
+#endif
 };
 
 class NotEqualOperator : public ParserOperator2 {
@@ -246,6 +276,10 @@ public:
 	virtual ~NotEqualOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Is not equal"; }
+#endif
 };
 
 class AssignmentOperator : public ParserOperator2 {
@@ -257,6 +291,10 @@ public:
 	
 	virtual bool canBeModified() const;
 	virtual double setValue(double value);
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Assign"; }
+#endif
 };
 
 class IncrementOperator : public ParserOperator2 {
@@ -265,6 +303,10 @@ public:
 	virtual ~IncrementOperator();
  
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Increment"; }
+#endif
 };
 
 class SignOperator : public ParserOperator1 {
@@ -273,6 +315,10 @@ public:
 	virtual ~SignOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Sign"; }
+#endif
 };
 
 class NSignOperator : public ParserOperator1 {
@@ -281,6 +327,10 @@ public:
 	virtual ~NSignOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Change sign"; }
+#endif
 };
 
 class PlusOperator : public ParserOperator2 {
@@ -289,6 +339,10 @@ public:
 	virtual ~PlusOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Add"; }
+#endif
 };
 
 class MinusOperator : public ParserOperator2 {
@@ -297,6 +351,10 @@ public:
 	virtual ~MinusOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Substract"; }
+#endif
 };
 
 class MultiplyOperator : public ParserOperator2 {
@@ -305,6 +363,10 @@ public:
 	virtual ~MultiplyOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Multiply"; }
+#endif
 };
 
 class MultiplyAndAssignOperator : public ParserOperator2 {
@@ -313,6 +375,10 @@ public:
 	virtual ~MultiplyAndAssignOperator();
  
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Multiply and assign"; }
+#endif
 };
 
 class DivideOperator : public ParserOperator2 {
@@ -321,6 +387,10 @@ public:
 	virtual ~DivideOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Divide"; }
+#endif
 };
 
 class DivideAndAssignOperator : public ParserOperator2 {
@@ -329,6 +399,10 @@ public:
 	virtual ~DivideAndAssignOperator();
  
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Divide and assign"; }
+#endif
 };
 
 class ModuloOperator : public ParserOperator2 {
@@ -337,6 +411,10 @@ public:
 	virtual ~ModuloOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Modulo"; }
+#endif
 };
 
 
@@ -346,6 +424,10 @@ public:
 	virtual ~SqrtOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Square root"; }
+#endif
 };
 
 class CbrtOperator : public ParserOperator1 {
@@ -354,6 +436,10 @@ public:
 	virtual ~CbrtOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Cubic root"; }
+#endif
 };
 
 class CosOperator : public ParserOperator1 {
@@ -362,6 +448,10 @@ public:
 	virtual ~CosOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Cosine"; }
+#endif
 };
 
 class SinOperator : public ParserOperator1 {
@@ -370,6 +460,10 @@ public:
 	virtual ~SinOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Sine"; }
+#endif
 };
 
 class TanOperator : public ParserOperator1 {
@@ -378,6 +472,10 @@ public:
 	virtual ~TanOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Tangent"; }
+#endif
 };
 
 class ExpOperator : public ParserOperator1 {
@@ -386,6 +484,10 @@ public:
 	virtual ~ExpOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Exponential"; }
+#endif
 };
 
 class LogOperator : public ParserOperator1 {
@@ -394,6 +496,10 @@ public:
 	virtual ~LogOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Natural logarithm"; }
+#endif
 };
 
 class Log10Operator : public ParserOperator1 {
@@ -402,6 +508,10 @@ public:
 	virtual ~Log10Operator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Base 10 logarithm"; }
+#endif
 };
 
 class ASinOperator : public ParserOperator1 {
@@ -410,6 +520,10 @@ public:
 	virtual ~ASinOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Arc sine"; }
+#endif
 };
 
 class ACosOperator : public ParserOperator1 {
@@ -418,6 +532,10 @@ public:
 	virtual ~ACosOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Arc cosine"; }
+#endif
 };
 
 
@@ -427,6 +545,10 @@ public:
 	virtual ~ATanOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Arc tangent"; }
+#endif
 };
 
 class ATan2Operator : public ParserOperator2 {
@@ -435,6 +557,10 @@ public:
 	virtual ~ATan2Operator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Arc tangent of two arguments"; }
+#endif
 };
 
 class SinHOperator : public ParserOperator1 {
@@ -443,6 +569,10 @@ public:
 	virtual ~SinHOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Hyperbolic sine"; }
+#endif
 };
 
 class CosHOperator : public ParserOperator1 {
@@ -451,6 +581,10 @@ public:
 	virtual ~CosHOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Hyperbolic cosine"; }
+#endif
 };
 
 class TanHOperator : public ParserOperator1 {
@@ -459,6 +593,10 @@ public:
 	virtual ~TanHOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Hyperbolic tangent"; }
+#endif
 };
 
 class ASinHOperator : public ParserOperator1 {
@@ -467,6 +605,10 @@ public:
 	virtual ~ASinHOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Inverse hyperbolic sine"; }
+#endif
 };
 
 class ACosHOperator : public ParserOperator1 {
@@ -475,6 +617,10 @@ public:
 	virtual ~ACosHOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Inverse hyperbolic cosine"; }
+#endif
 };
 
 class ATanHOperator : public ParserOperator1 {
@@ -483,6 +629,10 @@ public:
 	virtual ~ATanHOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Inverse hyperbolic tangent"; }
+#endif
 };
 
 class RoundOperator : public ParserOperator1 {
@@ -491,6 +641,10 @@ public:
 	virtual ~RoundOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Round to nearest"; }
+#endif
 };
 
 class CeilOperator : public ParserOperator1 {
@@ -499,6 +653,10 @@ public:
 	virtual ~CeilOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Round up"; }
+#endif
 };
 
 class FloorOperator : public ParserOperator1 {
@@ -507,6 +665,10 @@ public:
 	virtual ~FloorOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Round down"; }
+#endif
 };
 
 class FAbsOperator : public ParserOperator1 {
@@ -515,6 +677,10 @@ public:
 	virtual ~FAbsOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Absolute value"; }
+#endif
 };
 
 class PowOperator : public ParserOperator2 {
@@ -523,6 +689,10 @@ public:
 	virtual ~PowOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Pow"; }
+#endif
 };
 
 class Deg2RadOperator : public ParserOperator1 {
@@ -531,6 +701,10 @@ public:
 	virtual ~Deg2RadOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Convert angle from degree to radian"; }
+#endif
 };
 
 class Rad2DegOperator : public ParserOperator1 {
@@ -539,6 +713,10 @@ public:
 	virtual ~Rad2DegOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Convert angle from radian to degree"; }
+#endif
 };
 
 class MinimumOperator : public ParserOperator2 {
@@ -547,6 +725,10 @@ public:
 	virtual ~MinimumOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Minimum"; }
+#endif
 };
 
 class MaximumOperator : public ParserOperator2 {
@@ -555,6 +737,10 @@ public:
 	virtual ~MaximumOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Maximum"; }
+#endif
 };
 
 class URandOperator : public ParserOperator2 {
@@ -563,6 +749,10 @@ public:
 	virtual ~URandOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Uniform distribution random number"; }
+#endif
 };
 
 class NRandOperator : public ParserOperator2 {
@@ -573,6 +763,10 @@ public:
 	virtual double evaluate() const;
 	
 	static double generateValue();
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Normal distribution random number"; }
+#endif
 };
 
 class RandSeedOperator : public ParserOperator1 {
@@ -581,6 +775,10 @@ public:
 	virtual ~RandSeedOperator();
 
 	virtual double evaluate() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual String operatorName() const { return "Set seed for random numbers"; }
+#endif
 };
 
 /***********************************************************
