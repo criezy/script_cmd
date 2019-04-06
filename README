@@ -58,6 +58,20 @@ Type 'help' to get some help.
 > sqrt(3 + 12 / 5)
 2.32379000772
 
+If you enabled the tree debug feature at compile time, you can use the
+tree <equation> command to print the parser tree for the given equation.
+For example:
+$ ./script -e
+Starting simple equation mode.
+Type 'help' to get some help.
+> tree (3 + 12) / 5
+DivideOperator
+  PlusOperator
+    Constant: 3.000000
+    Constant: 12.000000
+  Constant: 5.000000
+3
+
 
 3) Script Mode
 --------------
@@ -146,6 +160,9 @@ Compilation should be straightforward: type 'make' and that's it.
 You can compile with support for the GNU deadline library for improved
 text inout (including history). To do so you need to edit two lines in the
 Makefile.
+
+You can also enable some debugging features by editing the corresponding
+line in the Makefile.
 
 The source code was originally written on SunOS, IRIX and HP-UX. I have not
 tested compilation on those systems when cleaning the code as I don't have
