@@ -78,6 +78,11 @@ void printScriptModuleHelp(int mode) {
 		printf("  - 'run [name]'     Run the previously defined script with the given name.\n");
 		printf("  - 'run [name] > file'    Run the previously defined script with the given name and redirect.\n");
 		printf("                           output to file.\n");
+#ifdef PARSER_TREE_DEBUG
+		printf("  - 'tree [name]'    Display the parser tree for the previously defined script with the given.\n");
+		printf("                     name. This can be useful to debug issues with the parser.\n");
+		printf("  - 'tree [name] > file'  Print the parser tree to the specified file.\n");
+#endif
 		printf("  - 'help [topic]'   Print this help or help on a specific topic. Topics are:\n");
 		printf("                     'constants', 'functions', 'operators' and 'script'.\n");
 		printf("  - 'quit' or 'exit' Quit the program.\n");
@@ -324,6 +329,30 @@ void runScriptModule(const String& s) {
 			}
 			continue;
 		}
+
+		// tree
+		if (cmd == "tree") {
+#ifdef PARSER_TREE_DEBUG
+			if (!scripts.contains(cur_name)) {
+				printf("The script '%s' is not defined.\n", cur_name.c_str());
+				printf("Type 'scripts' to get a list of defined scripts.\n");
+			} else {
+				parser.parse(scripts[cur_name], variables);
+				bool redirected = false;
+				if (!output_file.isEmpty())
+					redirected = redirect_output(output_file);
+
+				EquationParser::debugPrint(parser.getParserTreeDescription());
+
+				if (redirected)
+					close_redirect_output();
+			}
+#else
+			printf("The 'tree' command is not available as it was not enabled when compiling this executable.\n");
+#endif
+			continue;
+		}
+
 
 		// variables
 		if (cmd == "variables") {

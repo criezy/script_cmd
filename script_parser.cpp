@@ -18,7 +18,6 @@
  */
 
 #include "script_parser.h"
-#include "equation_parser.h"
 #include "math_utils.h"
 #include <ctype.h>
 
@@ -879,3 +878,78 @@ StringList ScriptParserEquationExpression::variablesName() const {
 	return vars;
 }
 
+/***********************************************************************************
+ * Debug code
+ ***********************************************************************************/
+
+#ifdef PARSER_TREE_DEBUG
+
+EquationParser::ParserTreeNode ScriptParser::getParserTreeDescription() const {
+	EquationParser::ParserTreeNode root;
+	root.description_ = "Script";
+	for (int i = 0 ; i < expressions_.size() ; ++i)
+		root.children_ << expressions_[i]->getParserTreeDescription();
+	return root;
+}
+
+EquationParser::ParserTreeNode ScriptParserConditionalExpression::getParserTreeDescription() const {
+	EquationParser::ParserTreeNode if_node;
+	if_node.description_ = "If";
+
+	EquationParser::ParserTreeNode cond_node;
+	cond_node.description_ = "Condition";
+	if (condition_ != NULL) {
+		EquationParser::ParserTreeNode if_cond_node = condition_->getParserTreeDescription();
+		// What we get above has three children for Condition/Then/Else.
+		// We only keep the Condition children part (the Then Else are constant 0 or 1).
+		if (!if_cond_node.children_.isEmpty())
+			cond_node.children_ << if_cond_node.children_.first().children_.first();
+	}
+	if_node.children_ << cond_node;
+
+	EquationParser::ParserTreeNode then_node;
+	then_node.description_ = "Then";
+	for (int i = 0 ; i < if_expressions_.size() ; ++i)
+		then_node.children_ << if_expressions_[i]->getParserTreeDescription();
+	if_node.children_ << then_node;
+
+	if (!else_expressions_.isEmpty()) {
+		EquationParser::ParserTreeNode else_node;
+		else_node.description_ = "Else";
+		for (int i = 0 ; i < else_expressions_.size() ; ++i)
+			else_node.children_ << else_expressions_[i]->getParserTreeDescription();
+		if_node.children_ << else_node;
+	}
+
+	return if_node;
+}
+
+EquationParser::ParserTreeNode ScriptParserWhileExpression::getParserTreeDescription() const {
+	EquationParser::ParserTreeNode while_node;
+	while_node.description_ = "While loop";
+
+	EquationParser::ParserTreeNode cond_node;
+	cond_node.description_ = "Condition";
+	if (condition_ != NULL)
+		cond_node.children_ << condition_->getParserTreeDescription();
+	while_node.children_ << cond_node;
+
+	EquationParser::ParserTreeNode then_node;
+	then_node.description_ = "Then";
+	for (int i = 0 ; i < expressions_.size() ; ++i)
+		then_node.children_ << expressions_[i]->getParserTreeDescription();
+	while_node.children_ << then_node;
+
+	return while_node;
+}
+
+EquationParser::ParserTreeNode ScriptParserEquationExpression::getParserTreeDescription() const {
+	if (equation_ == NULL) {
+		EquationParser::ParserTreeNode node;
+		node.description_ = "(Empty)";
+		return node;
+	}
+	return equation_->getParserTreeDescription();
+}
+
+#endif

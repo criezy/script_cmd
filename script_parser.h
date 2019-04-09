@@ -26,8 +26,10 @@
 #include "strlist.h"
 #include "strstream.h"
 
+// The next include is only needed for debugging. Otherwise we could use a forward declaration
+#include "equation_parser.h"
+
 class ScriptParserExpression;
-class EquationParser;
 
 /*! \class ScriptParser
  *
@@ -133,6 +135,10 @@ public:
 		const StringList &variable_names, bool auto_add_variables,
 		StringList &errors
 	);
+	
+#ifdef PARSER_TREE_DEBUG
+	EquationParser::ParserTreeNode getParserTreeDescription() const;
+#endif
 
 protected:
 	void clear();
@@ -172,6 +178,10 @@ public:
 	virtual void evaluate(double *var) = 0;
 
 	virtual StringList variablesName() const = 0;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual EquationParser::ParserTreeNode getParserTreeDescription() const = 0;
+#endif
 };
 
 /*! \class ScriptParserConditionalExpression
@@ -196,6 +206,10 @@ public:
 	virtual void evaluate(double *var);
 
 	virtual StringList variablesName() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual EquationParser::ParserTreeNode getParserTreeDescription() const;
+#endif
 
 private:
 	EquationParser *condition_;
@@ -226,6 +240,10 @@ public:
 
 	virtual StringList variablesName() const;
 
+#ifdef PARSER_TREE_DEBUG
+	virtual EquationParser::ParserTreeNode getParserTreeDescription() const;
+#endif
+
 private:
 	EquationParser *condition_;
 	List<ScriptParserExpression*> expressions_;
@@ -252,6 +270,10 @@ public:
 	virtual void evaluate(double *var);
 
 	virtual StringList variablesName() const;
+
+#ifdef PARSER_TREE_DEBUG
+	virtual EquationParser::ParserTreeNode getParserTreeDescription() const;
+#endif
 
 private:
 	EquationParser *equation_;

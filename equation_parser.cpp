@@ -19,6 +19,7 @@
 
 #include "equation_parser.h"
 #include "parser_operators.h"
+#include "redirect_output.h"
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -1027,7 +1028,7 @@ EquationParser::ParserTreeNode EquationParser::buildNode(const ParserOperator* o
 }
  
 void EquationParser::debugPrint(const ParserTreeNode& node, const String& prefix) {
-	std::cout << prefix.c_str() << node.description_.c_str() << std::endl;
+	rprintf("%s%s\n", prefix.c_str(), node.description_.c_str());
 	for (int i = 0 ; i < node.children_.size() ; ++i)
 		debugPrint(node.children_.at(i), prefix + "  ");
 }

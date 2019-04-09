@@ -174,8 +174,60 @@ Total number of samples: 12
 Number of invalid samples: 1
 
 
-4) Compilation and contributions
+You can use the 'tree' command to print the parser tree for a script. This is
+only available if you enabled the tree debugging feature when compiling.
 
+$ ./script
+Starting script mode.
+Type 'help' to get some help.
+> start
+if (z == 0) {
+  x = y;
+} else {
+  x = y / (2. * z);
+}
+print(x);
+z = z + 1;
+end
+> tree
+Script
+  If
+    Condition
+      Is equal
+        Variable: z
+        Constant: 0.000000
+    Then
+      Assign
+        Variable: x
+        Variable: y
+    Else
+      Assign
+        Variable: x
+        Divide
+          Variable: y
+          Multiply
+            Constant: 2.000000
+            Variable: z
+  Print
+    Variable: x
+  Assign
+    Variable: z
+    Add
+      Variable: z
+      Constant: 1.000000
+
+You can also provide a script name for a previously defined script:
+> start foo
+[...]
+end
+> tree foo
+
+And you can redirect the output to a file:
+> tree foo > foo_tree.txt
+
+
+4) Compilation and contributions
+--------------------------------
 Compilation should be straightforward: type 'make' and that's it.
 
 You can compile with support for the GNU deadline library for improved
