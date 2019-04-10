@@ -71,6 +71,7 @@ public:
 	bool contains(const String &x) const;
 	bool contains(const char *x) const;
 	bool startsWith(const String&) const;
+	bool endsWith(const String&) const;
 
 	const char* const c_str() const;
 	int length() const;

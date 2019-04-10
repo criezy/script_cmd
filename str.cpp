@@ -214,6 +214,14 @@ bool String::startsWith(const String& s) const {
 	return strncmp(data_->str_, s.data_->str_, s.data_->size_) == 0;
 }
 
+bool String::endsWith(const String& s) const {
+	if (s.isEmpty() || s.data_ == data_)
+		return true;
+	else if (s.length() > length())
+		return false;
+	return strncmp(data_->str_ + data_->size_ - s.data_->size_, s.data_->str_, s.data_->size_) == 0;
+}
+
 /*! \fn String String::left(int to) const
  *
  * Return the left part of this string up to and including the
