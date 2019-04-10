@@ -430,6 +430,11 @@ void ScriptParser::breakBlock(
 				state = 0;
 				continue;
 			}
+			// Check we do not have a else
+			else if (line.startsWith("else") && (line.length() == 4 || line[4] == ' ')) {
+				errors << String::format("Script parsing error line %d: unexpected 'else' (not preceded by 'if' or 'else if' statement).", line_number);
+				return;
+			}
 			// Otherwise read until we reach a ';' (which should be at the end of a line)
 			else if (!line.isEmpty() && line[line.length() - 1] == ';') {
 				expression += line.left(-2);
