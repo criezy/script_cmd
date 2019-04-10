@@ -150,7 +150,7 @@ protected:
 	);
 	static bool readBlock(
 		String &block, StrReadStream &stream,
-		int &line_number,
+		String &line, int &line_number,
 		StringList &errors
 	);
 

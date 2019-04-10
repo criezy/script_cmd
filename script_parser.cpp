@@ -299,22 +299,11 @@ void ScriptParser::breakBlock(
 		// and complete the conditional expression if needed.
 		if (state == 1 || state == 2) {
 			if (line == "else") {
-				// Look for start of block
-				do {
-					line = stream.readLine().trimmed();
-					if (line.startsWith("!!")) {
-						line_number = line.right(2).toInt();
-						line.clear();
-					}
-				} while (line.isEmpty() && !stream.atEnd());
-				if (line != "{") {
-					errors << String::format("Script parsing error line %d : '{' expected after 'else'.", line_number);
-					return;
-				}
+				line.clear();
 				// Read block
 				if (conditional_else_block)
 					else_block += " else {\n";
-				if (!readBlock(else_block, stream, line_number, errors))
+				if (!readBlock(else_block, stream, line, line_number, errors))
 					return;
 				if (conditional_else_block)
 					else_block += "}\n";
@@ -347,7 +336,7 @@ void ScriptParser::breakBlock(
 				}
 				else_if_condition.clear();
 				// Read block
-				if (!readBlock(else_block, stream, line_number, errors))
+				if (!readBlock(else_block, stream, line, line_number, errors))
 					return;
 				// Add a '}' to match the added 'if (...) {' at the beginning of the else block
 				else_block += "}\n";
@@ -401,7 +390,7 @@ void ScriptParser::breakBlock(
 				if (!readCondition(if_condition, stream, line, line_number, errors))
 					return;
 				// Read block
-				if (!readBlock(if_block, stream, line_number, errors))
+				if (!readBlock(if_block, stream, line, line_number, errors))
 					return;
 				state = 1;
 				continue;
@@ -431,7 +420,7 @@ void ScriptParser::breakBlock(
 					return;
 				// Read block
 				String while_block;
-				if (!readBlock(while_block, stream, line_number, errors))
+				if (!readBlock(while_block, stream, line, line_number, errors))
 					return;
 				// Create while parser object
 				ScriptParserExpression *exp = new ScriptParserWhileExpression(while_condition, while_block, variable_names, auto_add_variables, variable_array);
@@ -523,10 +512,6 @@ bool ScriptParser::readCondition(
 		return false;
 	}
 
-	if (!line.isEmpty()) {
-		errors << String::format("Script parsing error line %d: { expected after conditional expression but '%s' found.", line_number, line.c_str());
-		return false;
-	}
 	// remove last parenthesis
 	condition = condition.left(-2).trimmed();
 	// check the condition is not empty
@@ -534,34 +519,63 @@ bool ScriptParser::readCondition(
 		errors << String::format("Script parsing error line %d: empty conditional expression.", line_number);
 		return false;
 	}
-	// read next lines to find start of block
-	do {
-		line = stream.readLine().trimmed();
-		if (line.startsWith("!!")) {
-			line_number = line.right(2).toInt();
-			line.clear();
-		}
-	} while (line.isEmpty() && !stream.atEnd());
-	if (line != "{") {
-		errors << String::format("Script parsing error line %d: '{' expected after conditional expression.", line_number);
-		return false;
-	}
 
 	return true;
 }
 
-/*! \fn bool ScriptParser::readBlock(String &block, StrReadStream &stream, int &line_number, StringList &errors)
+/*! \fn bool ScriptParser::readBlock(String &block, StrReadStream &stream, String &line, int &line_number, StringList &errors)
  *
  * Internal function used to read a block of expressions from the stream.
  */
 bool ScriptParser::readBlock(
 	String &block, StrReadStream &stream,
-	int &line_number,
+	String &line, int &line_number,
 	StringList &errors
  ) {
+	 // Look for start of block
+	while (line.isEmpty() && !stream.atEnd()) {
+		line = stream.readLine().trimmed();
+		if (line.left(2) == "!!") {
+			line_number = line.right(2  ).toInt();
+			line.clear();
+		}
+	}
+
+	if (line != "{") {
+		// single line statement (except it may have more than one level)
+		block += line + "\n";
+		if (line.endsWith(";"))
+			return true;
+
+		while (!stream.atEnd()) {
+			line = stream.readLine().trimmed();
+
+			// Check there is something on the line
+			if (line.isEmpty())
+				continue;
+
+			block += line + "\n";
+
+			if (line.left(2) == "!!")
+				line_number = line.right(2).toInt();
+
+			if (line == "{") {
+				// Forbid this. This can get confusing if we allow nested blocks in a single-line block.
+				// The script may not behave as the user expect.
+				errors << String::format("Script parsing error line %d: nested blocks inside a single line conditional is forbidden.", line_number);
+				return false;
+			}
+
+			if (line.endsWith(";"))
+				return true;
+		}
+		errors << String::format("Script parsing error line %d: unexpected end of script (unbalanced '{' and '}' or missing ';')", line_number);
+		return false;
+	}
+
 	int block_level = 1;
 	while (!stream.atEnd()) {
-		String line = stream.readLine().trimmed();
+		line = stream.readLine().trimmed();
 
 		// Check there is something on the line
 		if (line.isEmpty())
@@ -581,7 +595,7 @@ bool ScriptParser::readBlock(
 		block += line + "\n";
 	}
 
-	errors << String("Script parsing error: unexpected end of script (unbalanced '{' and '}').");
+	errors << String::format("Script parsing error: unexpected end of script (unbalanced '{' and '}').");
 	return false;
 }
 
