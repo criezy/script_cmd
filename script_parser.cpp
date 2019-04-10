@@ -56,20 +56,24 @@ bool ScriptParser::parse(
 	const StringList &variable_names
 ) {
 	clear();
-	breakBlock(script, expressions_, variable_names, false, errors_);
-
-	if (!errors_.isEmpty()) {
-		for (List<ScriptParserExpression*>::iterator it = expressions_.begin() ; it != expressions_.end() ; ++it)
-			delete (*it);
-		expressions_.clear();
-		return false;
-	}
 
 	args_names_ = variable_names;
 	if (!args_names_.isEmpty()) {
 		args_double_ = new double[args_names_.size()];
 		memset(args_double_, 0, args_names_.size() * sizeof(double));
 	}
+
+	breakBlock(script, expressions_, variable_names, false, errors_, args_double_);
+
+	if (!errors_.isEmpty()) {
+		for (List<ScriptParserExpression*>::iterator it = expressions_.begin() ; it != expressions_.end() ; ++it)
+			delete (*it);
+		expressions_.clear();
+		delete [] args_double_;
+		args_double_ = NULL;
+		return false;
+	}
+
 	return true;
 }
 
@@ -113,7 +117,7 @@ void ScriptParser::evaluate(double *var) {
 		memcpy(args_double_, var, args_names_.size() * sizeof(double));
 
 	for (List<ScriptParserExpression*>::iterator it = expressions_.begin() ; it != expressions_.end() ; ++it)
-		(*it)->evaluate(args_double_);
+		(*it)->evaluate();
 
 	if (var != NULL && args_double_ != NULL)
 		memcpy(var, args_double_, args_names_.size() * sizeof(double));
@@ -163,16 +167,22 @@ String ScriptParser::getLastError() const {
 	return getError(nbErrors() - 1);
 }
 
-/*! \fn void ScriptParser::breakBlock(const String &script_block, List<ScriptParserExpression*> &expressions, const StringList &variable_names, bool auto_add_variables, StringList &errors)
+/*! \fn void ScriptParser::breakBlock(const String &script_block, List<ScriptParserExpression*> &expressions, const StringList &variable_names, bool auto_add_variables, StringList &errors, double* variable_array = NULL)
  *
  * Parse the given script block and fill the given ScriptParserExpression
  * list with expressions found in the script. If error are found during the
  * parsing they will be appended to the errors list.
+ *
+ * If \p auto_add_variables is false, you can pass the value array for the
+ * variables. The \p variable_array should therefore be allocated to hold as
+ * many value as elements in the \p variable_names list. The values will
+ * also be stored in the same order as the list.
  */
 void ScriptParser::breakBlock(
 	const String &script_block, List<ScriptParserExpression*> &expressions,
 	const StringList &variable_names, bool auto_add_variables,
-	StringList &errors
+	StringList &errors,
+	double* variable_array
 ) {
 	String script;
 	bool is_original_script = false;
@@ -354,9 +364,9 @@ void ScriptParser::breakBlock(
 		if (state == 3) {
 			ScriptParserExpression *exp = 0;
 			if (else_block.isEmpty())
-				exp = new ScriptParserConditionalExpression(if_condition, if_block, variable_names, auto_add_variables);
+				exp = new ScriptParserConditionalExpression(if_condition, if_block, variable_names, auto_add_variables, variable_array);
 			else
-				exp = new ScriptParserConditionalExpression(if_condition, if_block, else_block, variable_names, auto_add_variables);
+				exp = new ScriptParserConditionalExpression(if_condition, if_block, else_block, variable_names, auto_add_variables, variable_array);
 			expressions.append(exp);
 			for (int e = 0 ; e < exp->nbErrors() ; ++e)
 				errors.append(exp->getError(e));
@@ -424,7 +434,7 @@ void ScriptParser::breakBlock(
 				if (!readBlock(while_block, stream, line_number, errors))
 					return;
 				// Create while parser object
-				ScriptParserExpression *exp = new ScriptParserWhileExpression(while_condition, while_block, variable_names, auto_add_variables);
+				ScriptParserExpression *exp = new ScriptParserWhileExpression(while_condition, while_block, variable_names, auto_add_variables, variable_array);
 				expressions.append(exp);
 				for (int e = 0 ; e < exp->nbErrors() ; ++e)
 					errors.append(exp->getError(e));
@@ -435,7 +445,7 @@ void ScriptParser::breakBlock(
 			else if (!line.isEmpty() && line[line.length() - 1] == ';') {
 				expression += line.left(-2);
 				if (!expression.isEmpty()) {
-					ScriptParserExpression *exp = new ScriptParserEquationExpression(expression, variable_names, auto_add_variables);
+					ScriptParserExpression *exp = new ScriptParserEquationExpression(expression, variable_names, auto_add_variables, variable_array);
 					expressions.append(exp);
 					if (exp->nbErrors() > 0) {
 						errors << String::format("Script parsing error line %d:invalid expression '%s'.", line_number, expression.c_str());
@@ -454,9 +464,9 @@ void ScriptParser::breakBlock(
 	if (state == 1 || state == 2 || state == 3) {
 		ScriptParserExpression *exp = 0;
 		if (else_block.isEmpty())
-			exp = new ScriptParserConditionalExpression(if_condition, if_block, variable_names, auto_add_variables);
+			exp = new ScriptParserConditionalExpression(if_condition, if_block, variable_names, auto_add_variables, variable_array);
 		else
-			exp = new ScriptParserConditionalExpression(if_condition, if_block, else_block, variable_names, auto_add_variables);
+			exp = new ScriptParserConditionalExpression(if_condition, if_block, else_block, variable_names, auto_add_variables, variable_array);
 		expressions.append(exp);
 		for (int e = 0 ; e < exp->nbErrors() ; ++e)
 			errors.append(exp->getError(e));
@@ -606,7 +616,7 @@ String ScriptParserExpression::getError(int) const {
  * ScriptParserConditionalExpression
  ***********************************************************************************/
 
-/*! \fn ScriptParserConditionalExpression::ScriptParserConditionalExpression(const String &condition, const String &if_block, const String &else_block, const StringList &variable_names, bool auto_add_variables)
+/*! \fn ScriptParserConditionalExpression::ScriptParserConditionalExpression(const String &condition, const String &if_block, const String &else_block, const StringList &variable_names, bool auto_add_variables, double* variable_array = NULL)
  *
  * Create a ScriptParserConditionalExpression from the given condition
  * expression and the expressions blocks in the if and else block.
@@ -616,7 +626,8 @@ ScriptParserConditionalExpression::ScriptParserConditionalExpression(
 	const String &if_block,
 	const String &else_block,
 	const StringList &variable_names,
-	bool auto_add_variables
+	bool auto_add_variables,
+	double* variable_array
 ) :
 	ScriptParserExpression(), condition_(NULL)
 {
@@ -624,17 +635,17 @@ ScriptParserConditionalExpression::ScriptParserConditionalExpression(
 		// Create condition
 		String equation = "if(" + condition + ", 1., 0.)";
 		condition_ = new EquationParser();
-		condition_->parse(equation, variable_names, auto_add_variables);
+		condition_->parse(equation, variable_names, auto_add_variables, variable_array);
 		for (int e = 0 ; e < condition_->nbErrors() ; ++e)
 			errors_.append(condition_->getError(e));
 		// Parse if block
-		ScriptParser::breakBlock(if_block, if_expressions_, variable_names, auto_add_variables, errors_);
+		ScriptParser::breakBlock(if_block, if_expressions_, variable_names, auto_add_variables, errors_, variable_array);
 		// Parse else block
-		ScriptParser::breakBlock(else_block, else_expressions_, variable_names, auto_add_variables, errors_);
+		ScriptParser::breakBlock(else_block, else_expressions_, variable_names, auto_add_variables, errors_, variable_array);
 	}
 }
 
-/*! \fn ScriptParserConditionalExpression::ScriptParserConditionalExpression(const String &condition, const String &if_block, const StringList &variable_names, bool auto_add_variables)
+/*! \fn ScriptParserConditionalExpression::ScriptParserConditionalExpression(const String &condition, const String &if_block, const StringList &variable_names, bool auto_add_variables, double* variable_array = NULL)
  *
  * Create a ScriptParserConditionalExpression from the given condition
  * expression and the expressions block in the if block.
@@ -643,7 +654,8 @@ ScriptParserConditionalExpression::ScriptParserConditionalExpression(
 	const String &condition,
 	const String &if_block,
 	const StringList &variable_names,
-	bool auto_add_variables
+	bool auto_add_variables,
+	double* variable_array
 ) :
 	ScriptParserExpression(), condition_(NULL)
 {
@@ -651,11 +663,11 @@ ScriptParserConditionalExpression::ScriptParserConditionalExpression(
 		// Create condition
 		String equation = "if(" + condition + ", 1., 0.)";
 		condition_ = new EquationParser();
-		condition_->parse(equation, variable_names, auto_add_variables);
+		condition_->parse(equation, variable_names, auto_add_variables, variable_array);
 		for (int e = 0 ; e < condition_->nbErrors() ; ++e)
 			errors_.append(condition_->getError(e));
 		// Parse if block
-		ScriptParser::breakBlock(if_block, if_expressions_, variable_names, auto_add_variables, errors_);
+		ScriptParser::breakBlock(if_block, if_expressions_, variable_names, auto_add_variables, errors_, variable_array);
 	}
 }
 
@@ -685,20 +697,20 @@ String ScriptParserConditionalExpression::getError(int index) const {
 	return errors_[index];
 }
 
-/*! \fn void ScriptParserConditionalExpression::evaluate(double *var)
+/*! \fn void ScriptParserConditionalExpression::evaluate()
  *
  * Evaluate the condition and depending on the rsult evaluate the expressions
  * in the if block or in the else block.
  */
-void ScriptParserConditionalExpression::evaluate(double *var) {
+void ScriptParserConditionalExpression::evaluate() {
 	if (condition_ == NULL)
 		return;
-	if (!MathUtils::isEqual(condition_->evaluate(var), 0.)) {
+	if (!MathUtils::isEqual(condition_->evaluate(), 0.)) {
 		for (List<ScriptParserExpression*>::iterator it = if_expressions_.begin() ; it != if_expressions_.end() ; ++it)
-			(*it)->evaluate(var);
+			(*it)->evaluate();
 	} else {
 		for (List<ScriptParserExpression*>::iterator it = else_expressions_.begin() ; it != else_expressions_.end() ; ++it)
-			(*it)->evaluate(var);
+			(*it)->evaluate();
 	}
 }
 
@@ -731,7 +743,7 @@ StringList ScriptParserConditionalExpression::variablesName() const {
  * ScriptParserWhileExpression
  ***********************************************************************************/
 
-/*! \fn ScriptParserWhileExpression::ScriptParserWhileExpression(const String &condition, const String &block, const StringList &variable_names, bool auto_add_variables)
+/*! \fn ScriptParserWhileExpression::ScriptParserWhileExpression(const String &condition, const String &block, const StringList &variable_names, bool auto_add_variables, double* variable_array = NULL)
  *
  * Create a ScriptParserWhileExpression from the given condition
  * expression and the expressions block in the loop block.
@@ -740,7 +752,8 @@ ScriptParserWhileExpression::ScriptParserWhileExpression(
 	const String &condition,
 	const String &block,
 	const StringList &variable_names,
-	bool auto_add_variables
+	bool auto_add_variables,
+	double* variable_array
 ) :
 	ScriptParserExpression(), condition_(NULL)
 {
@@ -748,11 +761,11 @@ ScriptParserWhileExpression::ScriptParserWhileExpression(
 		// Create condition
 		String equation = "if(" + condition + ", 1., 0.)";
 		condition_ = new EquationParser();
-		condition_->parse(equation, variable_names, auto_add_variables);
+		condition_->parse(equation, variable_names, auto_add_variables, variable_array);
 		for (int e = 0 ; e < condition_->nbErrors() ; ++e)
 			errors_.append(condition_->getError(e));
 		// Parse if block
-		ScriptParser::breakBlock(block, expressions_, variable_names, auto_add_variables, errors_);
+		ScriptParser::breakBlock(block, expressions_, variable_names, auto_add_variables, errors_, variable_array);
 	}
 }
 
@@ -780,17 +793,17 @@ String ScriptParserWhileExpression::getError(int index) const {
 	return errors_[index];
 }
 
-/*! \fn void ScriptParserWhileExpression::evaluate(double *var)
+/*! \fn void ScriptParserWhileExpression::evaluate()
  *
  * Evaluate the condition and while it is true execute the expressions
  * in the while loop.
  */
-void ScriptParserWhileExpression::evaluate(double *var) {
+void ScriptParserWhileExpression::evaluate() {
 	if (condition_ == NULL)
 		return;
-	while (!MathUtils::isEqual(condition_->evaluate(var), 0.)) {
+	while (!MathUtils::isEqual(condition_->evaluate(), 0.)) {
 		for (List<ScriptParserExpression*>::iterator it = expressions_.begin() ; it != expressions_.end() ; ++it)
-			(*it)->evaluate(var);
+			(*it)->evaluate();
 	}
 }
 
@@ -816,7 +829,7 @@ StringList ScriptParserWhileExpression::variablesName() const {
  * ScriptParserEquationExpression
  ***********************************************************************************/
 
-/*! \fn ScriptParserEquationExpression::ScriptParserEquationExpression(const String &equation, const StringList &variable_names, bool auto_add_variables)
+/*! \fn ScriptParserEquationExpression::ScriptParserEquationExpression(const String &equation, const StringList &variable_names, bool auto_add_variables, double* variable_array = NULL)
  *
  * Build a ScriptParserEquationExpression for the given equation
  * using the given parameters.
@@ -824,13 +837,14 @@ StringList ScriptParserWhileExpression::variablesName() const {
 ScriptParserEquationExpression::ScriptParserEquationExpression(
 	const String &equation,
 	const StringList &variable_names,
-	bool auto_add_variables
+	bool auto_add_variables,
+	double* variable_array
 ) :
 	ScriptParserExpression(), equation_(NULL)
 {
 	if (!equation.isEmpty()) {
 		equation_ = new EquationParser();
-		equation_->parse(equation, variable_names, auto_add_variables);
+		equation_->parse(equation, variable_names, auto_add_variables, variable_array);
 	}
 }
 
@@ -858,13 +872,13 @@ String ScriptParserEquationExpression::getError(int index) const {
 	return equation_->getError(index);
 }
 
-/*! \fn void ScriptParserEquationExpression::evaluate(double *var)
+/*! \fn void ScriptParserEquationExpression::evaluate()
  *
  * Evaluate the result of this equation.
  */
-void ScriptParserEquationExpression::evaluate(double *var) {
+void ScriptParserEquationExpression::evaluate() {
 	if (equation_ != NULL)
-		equation_->evaluate(var);
+		equation_->evaluate();
 }
 
 /*! \fn StringList ScriptParserEquationExpression::variablesName() const

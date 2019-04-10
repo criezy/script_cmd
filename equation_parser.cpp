@@ -33,7 +33,7 @@ String EquationParser::nullStr_;
  */
 EquationParser::EquationParser() :
 	expression_(NULL), auto_add_args_(false), max_nb_args_(0),
-	args_double_(NULL), start_point_(NULL)
+	args_double_(NULL), own_args_double_(true), start_point_(NULL)
 {
 }
 
@@ -51,8 +51,10 @@ EquationParser::~EquationParser() {
 
 void EquationParser::clearArguments() {
 	if (args_double_) {
-		delete [] args_double_;
+		if (own_args_double_)
+			delete [] args_double_;
 		args_double_ = NULL;
+		own_args_double_ = true;
 	}
 	args_names_.clear();
 	max_nb_args_ = 0;
@@ -67,17 +69,17 @@ void EquationParser::clearArguments() {
 double EquationParser::evaluate(double *arg) {
 	if (!start_point_)
 		return 0.;
-	if (arg != NULL)
+	if (arg != NULL && arg != args_double_)
 		memcpy(args_double_, arg, args_names_.size() * sizeof(double));
 	double result = start_point_->evaluate();
-	if (arg != NULL)
+	if (arg != NULL && arg != args_double_)
 		memcpy(arg, args_double_, args_names_.size() * sizeof(double)); // in case it has been modified
 	return result;
 }
 
 // Parser
 
-/*! \fn bool EquationParser::parse(const String& equation, const StringList& variables_names, bool auto_add_variables = false)
+/*! \fn bool EquationParser::parse(const String& equation, const StringList& variables_names, bool auto_add_variables = false, double* variable_array = NULL)
  *
  * Parse an equation.
  *
@@ -89,11 +91,21 @@ double EquationParser::evaluate(double *arg) {
  * the parser find a name that he thinks is an unknown variable,
  * it will create a variable for you. You can both give some variable
  * names and let the parser find other variables used in the script.
+ *
+ * Finally, for optimization purposes, when \p auto_add_variables is false
+ * you can pass the variable value array you want to use (\p variable_array).
+ * It should have the same size and order as \p variables_names. This is
+ * mostly useful when using several EquationParser working sequentially on
+ * the same list of variables (e.g. what the ScriptParser does) to avoid
+ * copying values into/from the arrays allocated internaly by each
+ * EquationParser. Instead they will all share the same array (the one
+ * passed to this function).
  */
 bool EquationParser::parse(
 	const String& equation,
 	const StringList& variables_names,
-	bool auto_add_variables
+	bool auto_add_variables,
+	double* variable_array
 ) {
 	if (start_point_) {
 		delete start_point_;
@@ -112,8 +124,16 @@ bool EquationParser::parse(
 	auto_add_args_ = auto_add_variables;
 	if (auto_add_args_)
 		max_nb_args_ += 50;
-	if (max_nb_args_ > 0)
-		args_double_ = new double[max_nb_args_];
+	if (max_nb_args_ > 0) {
+		if (auto_add_variables || variable_array == NULL) {
+			args_double_ = new double[max_nb_args_];
+			own_args_double_ = true;
+		} else {
+			args_double_ = variable_array;
+			own_args_double_ = false;
+		}
+	}
+
 	args_names_ = variables_names;
 
 	expression_ = equation_.c_str();

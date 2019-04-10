@@ -133,7 +133,8 @@ public:
 	static void breakBlock(
 		const String &script_block, List<ScriptParserExpression*> &expressions,
 		const StringList &variable_names, bool auto_add_variables,
-		StringList &errors
+		StringList &errors,
+		double* variable_array = NULL
 	);
 	
 #ifdef PARSER_TREE_DEBUG
@@ -158,7 +159,6 @@ private:
 	// Equation evaluation
 	double *args_double_;
 	StringList args_names_;
-	int nb_args_;
 	// Errors
 	StringList errors_;
 };
@@ -175,7 +175,7 @@ public:
 	virtual int nbErrors() const;
 	virtual String getError(int) const;
 
-	virtual void evaluate(double *var) = 0;
+	virtual void evaluate() = 0;
 
 	virtual StringList variablesName() const = 0;
 
@@ -192,18 +192,20 @@ class ScriptParserConditionalExpression : public ScriptParserExpression {
 public:
 	ScriptParserConditionalExpression(
 			const String &condition, const String &if_block, const String &else_block,
-			const StringList &variable_names, bool auto_add_variables = false
+			const StringList &variable_names, bool auto_add_variables = false,
+			double* variable_array = NULL
 		);
 	ScriptParserConditionalExpression(
 			const String &condition, const String &if_block,
-			const StringList &variable_names, bool auto_add_variables = false
+			const StringList &variable_names, bool auto_add_variables = false,
+			double* variable_array = NULL
 		);
 	virtual ~ScriptParserConditionalExpression();
 
 	virtual int nbErrors() const;
 	virtual String getError(int) const;
 
-	virtual void evaluate(double *var);
+	virtual void evaluate();
 
 	virtual StringList variablesName() const;
 
@@ -229,14 +231,15 @@ public:
 		const String &condition,
 		const String &block,
 		const StringList &variable_names,
-		bool auto_add_variables = false
+		bool auto_add_variables = false,
+		double* variable_array = NULL
 	);
 	virtual ~ScriptParserWhileExpression();
 
 	virtual int nbErrors() const;
 	virtual String getError(int) const;
 
-	virtual void evaluate(double *var);
+	virtual void evaluate();
 
 	virtual StringList variablesName() const;
 
@@ -260,14 +263,15 @@ public:
 	ScriptParserEquationExpression(
 		const String &equation,
 		const StringList &variable_names,
-		bool auto_add_variables = false
+		bool auto_add_variables = false,
+		double* variable_array = NULL
 	);
 	virtual ~ScriptParserEquationExpression();
 
 	virtual int nbErrors() const;
 	virtual String getError(int) const;
 
-	virtual void evaluate(double *var);
+	virtual void evaluate();
 
 	virtual StringList variablesName() const;
 

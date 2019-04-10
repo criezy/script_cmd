@@ -135,7 +135,8 @@ public:
 	bool parse(
 		const String& equation,
 		const StringList& variables_names,
-		bool auto_add_variables = false
+		bool auto_add_variables = false,
+		double* variable_array = NULL
 	);
 
 	double evaluate(double *var = NULL);
@@ -185,6 +186,7 @@ private:
 	// Equation evaluation
 	int max_nb_args_;
 	double *args_double_;
+	bool own_args_double_;
 	StringList args_names_;
 	ParserOperator *start_point_;
 	StringList errors_;
