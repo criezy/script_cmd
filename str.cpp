@@ -132,6 +132,10 @@ void String::ensureCapacity(int new_size, bool keep_old) {
 	data_->str_ = new_storage;
 }
 
+/*! \fn String &String::operator=(const char *str)
+ *
+ * Copy the given string into this string.
+ */
 String &String::operator=(const char *str) {
 	int len = strlen(str);
 	ensureCapacity(len, false);
@@ -142,6 +146,10 @@ String &String::operator=(const char *str) {
 	return *this;
 }
 
+/*! \fn String &String::operator=(const String &str)
+ *
+ * Copy the given string into this string.
+ */
 String &String::operator=(const String &str) {
 	if (&str == this || str.data_ == data_)
 		return *this;
@@ -155,6 +163,10 @@ String &String::operator=(const String &str) {
 	return *this;
 }
 
+/*! \fn String &String::operator+=(const char *str)
+ *
+ * Append the given string to this string.
+ */
 String &String::operator+=(const char *str) {
 	if (data_ != NULL && data_->str_ <= str && str <= data_->str_ + data_->size_)
 		return operator+=(String(str));
@@ -168,6 +180,10 @@ String &String::operator+=(const char *str) {
 	return *this;
 }
 
+/*! \fn String &String::operator+=(const String &str)
+ *
+ * Append the given string to this string.
+ */
 String &String::operator+=(const String &str) {
 	if (&str == this)
 		return operator+=(String(str));
@@ -181,6 +197,10 @@ String &String::operator+=(const String &str) {
 	return *this;
 }
 
+/*! \fn String &String::operator+=(char c)
+ *
+ * Append the given character to this string.
+ */
 String &String::operator+=(char c) {
 	ensureCapacity(length() + 1, true);
 
@@ -190,6 +210,10 @@ String &String::operator+=(char c) {
 	return *this;
 }
 
+/*! \fn bool String::contains(const String &s) const
+ *
+ * Return trus if this strings contains the given string and false otherwise.
+ */
 bool String::contains(const String &s) const {
 	if (s.isEmpty() || s.data_ == data_)
 		return true;
@@ -198,6 +222,10 @@ bool String::contains(const String &s) const {
 	return strstr(data_->str_, s.data_->str_) != NULL;
 }
 
+/*! \fn bool String::contains(const char *s) const
+ *
+ * Return trus if this strings contains the given string and false otherwise.
+ */
 bool String::contains(const char *s) const {
 	if (s == NULL || *s == 0)
 		return true;
@@ -206,6 +234,10 @@ bool String::contains(const char *s) const {
 	return strstr(data_->str_, s) != NULL;
 }
 
+/*! \fn bool String::startsWith(const String& s) const
+ *
+ * Return true if this string starts with the given string and false otherwise.
+ */
 bool String::startsWith(const String& s) const {
 	if (s.isEmpty() || s.data_ == data_)
 		return true;
@@ -214,6 +246,10 @@ bool String::startsWith(const String& s) const {
 	return strncmp(data_->str_, s.data_->str_, s.data_->size_) == 0;
 }
 
+/*! \fn bool String::endsWith(const String& s) const
+ *
+ * Return true if this string ends with the given string and false otherwise.
+ */
 bool String::endsWith(const String& s) const {
 	if (s.isEmpty() || s.data_ == data_)
 		return true;
