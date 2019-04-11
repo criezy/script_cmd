@@ -20,7 +20,6 @@
 #include "script_parser.h"
 #include "math_utils.h"
 #include <ctype.h>
-#include <stdio.h>
 
 /*! \fn ScriptParser::ScriptParser()
  *
@@ -333,19 +332,7 @@ void ScriptParser::breakBlock(
 		// If we have left a 'if', 'else if' block check if we have something more
 		// and complete the conditional expression if needed.
 		if (state == 1 || state == 2) {
-			if (line == "else") {
-				line.clear();
-				// Read block
-				if (conditional_else_block)
-					else_block += " else\n{\n";
-				if (!readBlock(else_block, stream, line, line_number, errors))
-					return;
-				if (conditional_else_block)
-					else_block += "\n}\n";
-				state = 3;
-				continue;
-
-			} else if (line.startsWith("else if")) {
+			if (line.startsWith("else if") && (line.length() == 7 || line.isSpace(7) || line[7] == '(')) {
 				// Look for start of condition
 				line = line.right(7).trimmed();
 				while (line.isEmpty() && !stream.atEnd()) {
@@ -376,9 +363,18 @@ void ScriptParser::breakBlock(
 				// Add a '}' to match the added 'if (...) {' at the beginning of the else block
 				else_block += "\n}\n";
 				state = 2;
-				conditional_else_block = true;
 				continue;
-
+			} else if (line.startsWith("else") && (line.length() == 4 || line.isSpace(4))) {
+				line = line.right(4).trimmed();
+				// Read block
+				if (conditional_else_block)
+					else_block += " else\n{\n";
+				if (!readBlock(else_block, stream, line, line_number, errors))
+					return;
+				if (conditional_else_block)
+					else_block += "\n}\n";
+				state = 3;
+				continue;
 			} else
 				state = 3;
 
@@ -404,7 +400,7 @@ void ScriptParser::breakBlock(
 		// Normal reading
 		if (state == 0) {
 			// Checking if we start a if statement
-			if (line.startsWith("if") && (line.length() == 2 || line.right(2).trimmed()[0] == '(')) {
+			if (line.startsWith("if") && (line.length() == 2 || line.isSpace(2) || line[2] == '(')) {
 				if (!expression.isEmpty()) {
 					errors << String::format("Script parsing error line %d: missing ';' before 'if'.", line_number);
 					return;
@@ -431,7 +427,7 @@ void ScriptParser::breakBlock(
 				continue;
 			}
 			// Checking if we start a while statement
-			else if (line.startsWith("while") && (line.length() == 5 || line.right(5).trimmed()[0] == '(')) {
+			else if (line.startsWith("while") && (line.length() == 5 || line.isSpace(5) || line[5] == '(')) {
 				if (!expression.isEmpty()) {
 					errors << String::format("Script parsing error line %d: missing ';' before 'while'.", line_number);
 					return;
