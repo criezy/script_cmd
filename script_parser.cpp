@@ -259,12 +259,12 @@ void ScriptParser::breakBlock(
 				if (c == '{' || c == '}' || c == ';')
 					script += '\n';
 				++i;
-				if (script.endsWith("\nelse") && i < length && isspace(s[i])) {
+				if (script.endsWith("\nelse") && s.isSpace(i)) {
 					// check if this is followed by a if, and make sure to only keep a single
 					// space between the two.
 					int j = i + 1;
 					while (j < length) {
-						if (isspace(s[j]))
+						if (s.isSpace(j))
 							++j;
 						else if (
 							j + 2 < length && s[j-1] == '\n' && s[j] == '!' && s[j+1] == '!' &&
@@ -279,7 +279,7 @@ void ScriptParser::breakBlock(
 							++j;
 						} else if (
 							j + 2 < length && s[j] == 'i' && s[j+1] == 'f' &&
-							(isspace(s[j+2]) || s[j+2] == '(')
+							(s.isSpace(j+2) || s[j+2] == '(')
 						) {
 							script += " if";
 							i = j + 2;
@@ -571,7 +571,7 @@ bool ScriptParser::readBlock(
 	// Look for start of block
 	while (line.isEmpty() && !stream.atEnd()) {
 		line = stream.readLine().trimmed();
-		if (line.left(2) == "!!") {
+		if (line.startsWith("!!")) {
 			line_number = line.right(2  ).toInt();
 			line.clear();
 		}
@@ -592,7 +592,7 @@ bool ScriptParser::readBlock(
 
 			block += line + "\n";
 
-			if (line.left(2) == "!!")
+			if (line.startsWith("!!"))
 				line_number = line.right(2).toInt();
 
 			if (line == "{") {
