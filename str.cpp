@@ -222,6 +222,18 @@ bool String::endsWith(const String& s) const {
 	return strncmp(data_->str_ + data_->size_ - s.data_->size_, s.data_->str_, s.data_->size_) == 0;
 }
 
+/*! \fn bool String::isSpace(int index) const
+ *
+ * Return true if the given index is valid and the character at that position is
+ * a space (as identified by isspace(char), so this include also tabs and new lines).
+ * Return false otherwise.
+ *
+ * \see findSpace(int)
+ */
+bool String::isSpace(int index) const {
+	return (index >= 0 && index < length() && isspace(*(data_->str_ + index)));
+}
+
 /*! \fn String String::left(int to) const
  *
  * Return the left part of this string up to and including the

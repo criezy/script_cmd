@@ -72,6 +72,7 @@ public:
 	bool contains(const char *x) const;
 	bool startsWith(const String&) const;
 	bool endsWith(const String&) const;
+	bool isSpace(int) const;
 
 	const char* const c_str() const;
 	int length() const;
