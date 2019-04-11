@@ -20,6 +20,7 @@
 #include "script_parser.h"
 #include "math_utils.h"
 #include <ctype.h>
+#include <stdio.h>
 
 /*! \fn ScriptParser::ScriptParser()
  *
@@ -204,11 +205,16 @@ void ScriptParser::breakBlock(
 		// add new line after ;
 		// add new line after and before } and {
 		// simplify new lines
+		// simplify any space and new line between else and if
 		// This way each line only contains one expression.
 		// This also means that if { ... } else { ... } construct will look like
 		// if
 		// {
 		// ....
+		// }
+		// else if
+		// {
+		// ...
 		// }
 		// else
 		// {
@@ -254,6 +260,35 @@ void ScriptParser::breakBlock(
 				if (c == '{' || c == '}' || c == ';')
 					script += '\n';
 				++i;
+				if (script.endsWith("\nelse") && i < length && isspace(s[i])) {
+					// check if this is followed by a if, and make sure to only keep a single
+					// space between the two.
+					int j = i + 1;
+					while (j < length) {
+						if (isspace(s[j]))
+							++j;
+						else if (
+							j + 2 < length && s[j-1] == '\n' && s[j] == '!' && s[j+1] == '!' &&
+							s[j+2] >= 48 && s[j+2] <= 57
+						) {
+							// This is a line number inserted above. Skip it.
+							j = j + 3;
+							while (j < length && s[j] >= 48 && s[j] <= 57)
+								++j;							
+							if (j == length || s[j] != '\n')
+								break;
+							++j;
+						} else if (
+							j + 2 < length && s[j] == 'i' && s[j+1] == 'f' &&
+							(isspace(s[j+2]) || s[j+2] == '(')
+						) {
+							script += " if";
+							i = j + 2;
+							break;
+						} else
+							break;
+					}
+				}
 			}
 		}
 	} else
@@ -302,11 +337,11 @@ void ScriptParser::breakBlock(
 				line.clear();
 				// Read block
 				if (conditional_else_block)
-					else_block += " else {\n";
+					else_block += " else\n{\n";
 				if (!readBlock(else_block, stream, line, line_number, errors))
 					return;
 				if (conditional_else_block)
-					else_block += "}\n";
+					else_block += "\n}\n";
 				state = 3;
 				continue;
 
@@ -330,16 +365,16 @@ void ScriptParser::breakBlock(
 					return;
 				// Add condition
 				if (else_block.isEmpty())
-					else_block += String::format("!!%d\nif (", line_number) + else_if_condition + ") {\n";
+					else_block += String::format("!!%d\nif (", line_number) + else_if_condition + ")\n{\n";
 				else {
-					else_block += "else if (" + else_if_condition + ") {\n";
+					else_block += "else if (" + else_if_condition + ")\n{\n";
 				}
 				else_if_condition.clear();
 				// Read block
 				if (!readBlock(else_block, stream, line, line_number, errors))
 					return;
 				// Add a '}' to match the added 'if (...) {' at the beginning of the else block
-				else_block += "}\n";
+				else_block += "\n}\n";
 				state = 2;
 				conditional_else_block = true;
 				continue;
@@ -537,7 +572,7 @@ bool ScriptParser::readBlock(
 	String &line, int &line_number,
 	StringList &errors
  ) {
-	 // Look for start of block
+	// Look for start of block
 	while (line.isEmpty() && !stream.atEnd()) {
 		line = stream.readLine().trimmed();
 		if (line.left(2) == "!!") {
