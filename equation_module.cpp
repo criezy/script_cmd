@@ -24,6 +24,7 @@
 #include <stdio.h>
 #ifdef USE_READLINE
 #include <readline/readline.h>
+#include <readline/history.h>
 #endif
 
 void printEquationModuleHelp(int mode) {
